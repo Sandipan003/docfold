@@ -1,6 +1,18 @@
 # Docfold — Doc Scanner to PDF
 
+![Docfold: scan pages, arrange them, save one clean PDF. No watermark, no account, offline.](store-assets/feature-graphic-1024x500.png)
+
 A free, offline Android document scanner: scan pages, arrange them like stamps, save one clean PDF. Native Kotlin + Jetpack Compose, ~4 MB installed, no database, no account, AdMob-supported. Plus a small Next.js site (privacy policy + `app-ads.txt`) for Vercel.
+
+## Screenshots
+
+<p align="center">
+  <img src="store-assets/phone-05.png" width="19%" alt="First-run story: Paper, meet phone. Your documents stay on your phone.">
+  <img src="store-assets/phone-01.png" width="19%" alt="Home: documents shown as airmail letters with page counts. Scan to PDF, no watermark.">
+  <img src="store-assets/phone-02.png" width="19%" alt="Document: pages as postage stamps you hold and drag to reorder.">
+  <img src="store-assets/phone-04.png" width="19%" alt="Page editor: sign with your finger, crop and clean up shadows.">
+  <img src="store-assets/phone-03.png" width="19%" alt="Save as PDF: pick a file-size limit such as Under 1 MB and Docfold fits the PDF under it.">
+</p>
 
 ## What's inside
 
