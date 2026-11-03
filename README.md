@@ -7,11 +7,11 @@ A free, offline Android document scanner: scan pages, arrange them like stamps, 
 ## Screenshots
 
 <p align="center">
-  <img src="store-assets/phone-05.png" width="19%" alt="First-run story: Paper, meet phone. Your documents stay on your phone.">
-  <img src="store-assets/phone-01.png" width="19%" alt="Home: documents shown as airmail letters with page counts. Scan to PDF, no watermark.">
-  <img src="store-assets/phone-02.png" width="19%" alt="Document: pages as postage stamps you hold and drag to reorder.">
-  <img src="store-assets/phone-04.png" width="19%" alt="Page editor: sign with your finger, crop and clean up shadows.">
-  <img src="store-assets/phone-03.png" width="19%" alt="Save as PDF: pick a file-size limit such as Under 1 MB and Docfold fits the PDF under it.">
+  <img src="store-assets/phone-05.png" width="18%" alt="First-run story: Paper, meet phone. Your documents stay on your phone.">
+  <img src="store-assets/phone-01.png" width="18%" alt="Home: documents shown as airmail letters with page counts. Scan to PDF, no watermark.">
+  <img src="store-assets/phone-02.png" width="18%" alt="Document: pages as postage stamps you hold and drag to reorder.">
+  <img src="store-assets/phone-04.png" width="18%" alt="Page editor: sign with your finger, crop and clean up shadows.">
+  <img src="store-assets/phone-03.png" width="18%" alt="Save as PDF: pick a file-size limit such as Under 1 MB and Docfold fits the PDF under it.">
 </p>
 
 ## What's inside
