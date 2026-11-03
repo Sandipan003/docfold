@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Azeret+Mono:wght@400;600&family=Archivo:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:390px;height:844px;overflow:hidden;background:#fff;color:#111;font-family:Archivo,sans-serif;position:relative}
+.status{height:28px;display:flex;justify-content:space-between;padding:6px 20px;font:600 12px 'Azeret Mono'}
+.mark{position:relative;height:200px;padding:6px 18px}
+.mark h1{position:absolute;left:18px;top:6px;font:400 112px/0.86 Anton;text-transform:uppercase;letter-spacing:-.01em}
+.mark .a{color:#FF48B0;mix-blend-mode:multiply}
+.mark .b{color:#0078BF;mix-blend-mode:multiply;transform:translate(5px,4px)}
+.dots{position:absolute;right:-30px;top:20px;width:170px;height:170px;border-radius:50%;
+ background:radial-gradient(#FFE800 34%,transparent 36%) 0 0/10px 10px;mix-blend-mode:multiply}
+.tag{position:absolute;left:20px;bottom:6px;font:600 10px 'Azeret Mono';letter-spacing:.12em;background:#111;color:#fff;padding:4px 8px}
+.counter{display:flex;gap:8px;padding:14px 18px 6px}
+.chip{height:36px;padding:0 14px;border:2px solid #111;border-radius:18px;display:flex;align-items:center;font:600 11px 'Azeret Mono'}
+.chip.on{background:#111;color:#fff}
+.stack{padding:10px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.out{position:relative;height:170px}
+.sheet{position:absolute;inset:0 10px 34px 0;background:#fff;border:2px solid #111}
+.sheet.s2{transform:translate(6px,-6px);background:var(--c)}
+.sheet.s1{transform:translate(3px,-3px)}
+.sheet i{position:absolute;left:10px;right:10px;height:4px;background:#111;opacity:.75}
+.out b{position:absolute;left:0;bottom:12px;font-weight:700;font-size:13px}
+.out small{position:absolute;left:0;bottom:0;font:400 9px 'Azeret Mono'}
+.out .n{position:absolute;right:6px;top:4px;font:400 34px Anton;color:#111;background:#FFE800;padding:0 6px;z-index:2}
+.fab{position:absolute;left:18px;right:18px;bottom:76px;height:62px;background:#111;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:12px;font:400 26px Anton;letter-spacing:.04em;overflow:hidden}
+.fab::after{content:"";position:absolute;top:0;bottom:0;left:30%;width:40px;background:linear-gradient(90deg,transparent,#FFE800,transparent);opacity:.8}
+.ad{position:absolute;left:0;right:0;bottom:0;height:56px;background:#f1f1f1;border-top:2px solid #111;display:flex;align-items:center;justify-content:center;font:400 10px 'Azeret Mono';color:#777}
+</style></head><body>
+<div class="status"><span>9:41</span><span>72%</span></div>
+<div class="mark"><div class="dots"></div><h1 class="a">Doc<br>fold</h1><h1 class="b">Doc<br>fold</h1><span class="tag">COPY SHOP · 14 DOCS</span></div>
+<div class="counter"><span class="chip on">ALL</span><span class="chip">IDS</span><span class="chip">RECEIPTS</span><span class="chip">NOTES</span></div>
+<div class="stack">
+ <div class="out" style="--c:#FF48B0"><div class="sheet s2"></div><div class="sheet s1"></div><div class="sheet"><i style="top:16px"></i><i style="top:28px;right:30px"></i><i style="top:40px"></i></div><span class="n">02</span><b>Aadhaar card</b><small>TODAY · 412 KB</small></div>
+ <div class="out" style="--c:#0078BF"><div class="sheet"><i style="top:16px"></i><i style="top:28px;right:24px"></i></div><span class="n">01</span><b>Fee receipt</b><small>TODAY · 188 KB</small></div>
+ <div class="out" style="--c:#FFE800"><div class="sheet s2"></div><div class="sheet s1"></div><div class="sheet"><i style="top:16px"></i><i style="top:28px"></i><i style="top:40px;right:40px"></i></div><span class="n">11</span><b>Rental agreement</b><small>01 NOV · 2.4 MB</small></div>
+ <div class="out" style="--c:#FF48B0"><div class="sheet s2"></div><div class="sheet s1"></div><div class="sheet"><i style="top:16px;right:20px"></i><i style="top:28px"></i></div><span class="n">18</span><b>Physics notes</b><small>28 OCT · 3.1 MB</small></div>
+</div>
+<div class="fab">SCAN A PAGE</div>
+<div class="ad">AD · ADAPTIVE BANNER</div>
+</body></html>

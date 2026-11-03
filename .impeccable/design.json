@@ -1,0 +1,642 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T00:00:00Z",
+  "title": "Design System: Docfold",
+  "extensions": {
+    "colorMeta": {
+      "airmail-red": {
+        "role": "primary",
+        "displayName": "Airmail Red",
+        "tonalRamp": [
+          "#410004",
+          "#6E0E12",
+          "#A3161D",
+          "#D7262E",
+          "#FF5A5F",
+          "#FF8A86",
+          "#FFDAD7",
+          "#FCE3E2"
+        ]
+      },
+      "airmail-red-night": {
+        "role": "primary",
+        "displayName": "Night Airmail Red",
+        "tonalRamp": [
+          "#410004",
+          "#6E0E12",
+          "#A3161D",
+          "#D7262E",
+          "#FF5A5F",
+          "#FF8A86",
+          "#FFDAD7",
+          "#FCE3E2"
+        ]
+      },
+      "airmail-red-container": {
+        "role": "primary",
+        "displayName": "Red Container",
+        "tonalRamp": [
+          "#410004",
+          "#6E0E12",
+          "#A3161D",
+          "#D7262E",
+          "#FF5A5F",
+          "#FF8A86",
+          "#FFDAD7",
+          "#FCE3E2"
+        ]
+      },
+      "airmail-blue": {
+        "role": "secondary",
+        "displayName": "Airmail Blue",
+        "tonalRamp": [
+          "#0B1D47",
+          "#0E2459",
+          "#1B3F8F",
+          "#243A72",
+          "#5B7BD6",
+          "#9DB6FF",
+          "#DCE5FF",
+          "#E1E8F7"
+        ]
+      },
+      "airmail-blue-night": {
+        "role": "secondary",
+        "displayName": "Night Airmail Blue",
+        "tonalRamp": [
+          "#0B1D47",
+          "#0E2459",
+          "#1B3F8F",
+          "#243A72",
+          "#5B7BD6",
+          "#9DB6FF",
+          "#DCE5FF",
+          "#E1E8F7"
+        ]
+      },
+      "airmail-blue-band-night": {
+        "role": "secondary",
+        "displayName": "Night Chevron Blue",
+        "tonalRamp": [
+          "#0B1D47",
+          "#0E2459",
+          "#1B3F8F",
+          "#243A72",
+          "#5B7BD6",
+          "#9DB6FF",
+          "#DCE5FF",
+          "#E1E8F7"
+        ]
+      },
+      "airmail-blue-container": {
+        "role": "secondary",
+        "displayName": "Blue Container",
+        "tonalRamp": [
+          "#0B1D47",
+          "#0E2459",
+          "#1B3F8F",
+          "#243A72",
+          "#5B7BD6",
+          "#9DB6FF",
+          "#DCE5FF",
+          "#E1E8F7"
+        ]
+      },
+      "postal-green": {
+        "role": "tertiary",
+        "displayName": "Postal Green",
+        "tonalRamp": [
+          "#003824",
+          "#053D29",
+          "#0B4A33",
+          "#12825A",
+          "#4CC79A",
+          "#59CFA0",
+          "#C9F2DF",
+          "#D9F1E6"
+        ]
+      },
+      "envelope-white": {
+        "role": "neutral",
+        "displayName": "Envelope White",
+        "tonalRamp": [
+          "#14161A",
+          "#23262C",
+          "#52565F",
+          "#8E9199",
+          "#DADAD3",
+          "#E4E4DE",
+          "#F1F1EC",
+          "#FBFBF8"
+        ]
+      },
+      "stamp-paper": {
+        "role": "neutral",
+        "displayName": "Stamp Paper",
+        "tonalRamp": [
+          "#14161A",
+          "#23262C",
+          "#52565F",
+          "#8E9199",
+          "#DADAD3",
+          "#E4E4DE",
+          "#F1F1EC",
+          "#FBFBF8"
+        ]
+      },
+      "sorting-office": {
+        "role": "neutral",
+        "displayName": "Sorting Office",
+        "tonalRamp": [
+          "#0B0E14",
+          "#10131A",
+          "#151922",
+          "#1A1F29",
+          "#212733",
+          "#2A303D",
+          "#353C4B",
+          "#ADB2BE"
+        ]
+      },
+      "stamp-paper-night": {
+        "role": "neutral",
+        "displayName": "Night Stamp Paper",
+        "tonalRamp": [
+          "#0B0E14",
+          "#10131A",
+          "#151922",
+          "#1A1F29",
+          "#212733",
+          "#2A303D",
+          "#353C4B",
+          "#ADB2BE"
+        ]
+      },
+      "engraving-ink": {
+        "role": "neutral",
+        "displayName": "Engraving Ink",
+        "tonalRamp": [
+          "#14161A",
+          "#23262C",
+          "#52565F",
+          "#8E9199",
+          "#DADAD3",
+          "#E4E4DE",
+          "#F1F1EC",
+          "#FBFBF8"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "tonalRamp": [
+          "#14161A",
+          "#23262C",
+          "#52565F",
+          "#8E9199",
+          "#DADAD3",
+          "#E4E4DE",
+          "#F1F1EC",
+          "#FBFBF8"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "tonalRamp": [
+          "#0B0E14",
+          "#10131A",
+          "#151922",
+          "#1A1F29",
+          "#212733",
+          "#2A303D",
+          "#353C4B",
+          "#ADB2BE"
+        ]
+      },
+      "night-ink-soft": {
+        "role": "neutral",
+        "displayName": "Night Ink Soft",
+        "tonalRamp": [
+          "#0B0E14",
+          "#10131A",
+          "#151922",
+          "#1A1F29",
+          "#212733",
+          "#2A303D",
+          "#353C4B",
+          "#ADB2BE"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "tonalRamp": [
+          "#14161A",
+          "#23262C",
+          "#52565F",
+          "#8E9199",
+          "#DADAD3",
+          "#E4E4DE",
+          "#F1F1EC",
+          "#FBFBF8"
+        ]
+      },
+      "hairline-night": {
+        "role": "neutral",
+        "displayName": "Night Hairline",
+        "tonalRamp": [
+          "#0B0E14",
+          "#10131A",
+          "#151922",
+          "#1A1F29",
+          "#212733",
+          "#2A303D",
+          "#353C4B",
+          "#ADB2BE"
+        ]
+      },
+      "outline": {
+        "role": "neutral",
+        "displayName": "Outline",
+        "tonalRamp": [
+          "#14161A",
+          "#23262C",
+          "#52565F",
+          "#8E9199",
+          "#DADAD3",
+          "#E4E4DE",
+          "#F1F1EC",
+          "#FBFBF8"
+        ]
+      },
+      "error": {
+        "role": "error",
+        "displayName": "Error Red",
+        "tonalRamp": [
+          "#410004",
+          "#6E0E12",
+          "#A3161D",
+          "#D7262E",
+          "#FF5A5F",
+          "#FF8A86",
+          "#FFDAD7",
+          "#FCE3E2"
+        ]
+      },
+      "ink-vermilion": {
+        "role": "stamp-ink",
+        "displayName": "Vermilion Stamp Ink",
+        "tonalRamp": [
+          "#E2452B",
+          "#FF7A5C"
+        ]
+      },
+      "ink-vermilion-night": {
+        "role": "stamp-ink",
+        "displayName": "Night Vermilion Stamp Ink",
+        "tonalRamp": [
+          "#E2452B",
+          "#FF7A5C"
+        ]
+      },
+      "ink-ultramarine": {
+        "role": "stamp-ink",
+        "displayName": "Ultramarine Stamp Ink",
+        "tonalRamp": [
+          "#2F4FD8",
+          "#8EA2FF"
+        ]
+      },
+      "ink-ultramarine-night": {
+        "role": "stamp-ink",
+        "displayName": "Night Ultramarine Stamp Ink",
+        "tonalRamp": [
+          "#2F4FD8",
+          "#8EA2FF"
+        ]
+      },
+      "ink-emerald": {
+        "role": "stamp-ink",
+        "displayName": "Emerald Stamp Ink",
+        "tonalRamp": [
+          "#12825A",
+          "#4CC79A"
+        ]
+      },
+      "ink-emerald-night": {
+        "role": "stamp-ink",
+        "displayName": "Night Emerald Stamp Ink",
+        "tonalRamp": [
+          "#12825A",
+          "#4CC79A"
+        ]
+      },
+      "ink-saffron": {
+        "role": "stamp-ink",
+        "displayName": "Saffron Stamp Ink",
+        "tonalRamp": [
+          "#B87500",
+          "#F2B53A"
+        ]
+      },
+      "ink-saffron-night": {
+        "role": "stamp-ink",
+        "displayName": "Night Saffron Stamp Ink",
+        "tonalRamp": [
+          "#B87500",
+          "#F2B53A"
+        ]
+      },
+      "ink-violet": {
+        "role": "stamp-ink",
+        "displayName": "Violet Stamp Ink",
+        "tonalRamp": [
+          "#7A3FB0",
+          "#C49BF0"
+        ]
+      },
+      "ink-violet-night": {
+        "role": "stamp-ink",
+        "displayName": "Night Violet Stamp Ink",
+        "tonalRamp": [
+          "#7A3FB0",
+          "#C49BF0"
+        ]
+      },
+      "ink-rose": {
+        "role": "stamp-ink",
+        "displayName": "Rose Stamp Ink",
+        "tonalRamp": [
+          "#D03C7A",
+          "#FF86B8"
+        ]
+      },
+      "ink-rose-night": {
+        "role": "stamp-ink",
+        "displayName": "Night Rose Stamp Ink",
+        "tonalRamp": [
+          "#D03C7A",
+          "#FF86B8"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display-large": {
+        "displayName": "Display Large",
+        "purpose": "The Docfold masthead."
+      },
+      "display-medium": {
+        "displayName": "Display Medium",
+        "purpose": "Intro chapter titles; envelope page count (set at 50sp)."
+      },
+      "display-small": {
+        "displayName": "Display Small",
+        "purpose": "Large condensed numerals."
+      },
+      "headline-large": {
+        "displayName": "Headline Large",
+        "purpose": "Large condensed headings."
+      },
+      "headline-medium": {
+        "displayName": "Headline Medium",
+        "purpose": "Screen, sheet and document titles."
+      },
+      "headline-small": {
+        "displayName": "Headline Small",
+        "purpose": "Top-bar titles; stamp page numbers (set at 20sp)."
+      },
+      "title-large": {
+        "displayName": "Title Large",
+        "purpose": "Scan FAB label."
+      },
+      "title-medium": {
+        "displayName": "Title Medium",
+        "purpose": "Primary button labels, list item names."
+      },
+      "title-small": {
+        "displayName": "Title Small",
+        "purpose": "Minor titles."
+      },
+      "body-large": {
+        "displayName": "Body Large",
+        "purpose": "Instructions and intro copy."
+      },
+      "body-medium": {
+        "displayName": "Body Medium",
+        "purpose": "Descriptions in sheets and lists."
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Small supporting text."
+      },
+      "label-large": {
+        "displayName": "Label Large",
+        "purpose": "Secondary buttons, Add pages tile."
+      },
+      "label-medium": {
+        "displayName": "Label Medium",
+        "purpose": "Chips and compact labels."
+      },
+      "label-small": {
+        "displayName": "Label Small",
+        "purpose": "Smallest labels."
+      },
+      "mono-small": {
+        "displayName": "Mono Small",
+        "purpose": "Dates, sizes, page units on cards; version string."
+      },
+      "mono-medium": {
+        "displayName": "Mono Medium",
+        "purpose": "Home count line, export size estimate."
+      },
+      "mono-strong": {
+        "displayName": "Mono Strong",
+        "purpose": "Guide words (first/last date in view)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "stamp-lift",
+        "value": "path fill rgba(0,0,0,0.08) at y+1.5dp, rgba(0,0,0,0.05) at y+2.4dp",
+        "purpose": "Under perforated stamps, drawn from the cached perforation path. Never Material elevation on a perforated outline."
+      },
+      {
+        "name": "envelope-ambient",
+        "value": "Material shadowElevation 1dp (0 when selected)",
+        "purpose": "Envelope cards (convex 8dp outline) only."
+      },
+      {
+        "name": "drag-lift",
+        "value": "scale 1.08, rotationZ -3deg",
+        "purpose": "A stamp being dragged on the page sheet."
+      }
+    ],
+    "motion": [
+      {
+        "name": "postmark-land",
+        "value": "alpha in 90ms; scale 1.6 to 1 spring(damping 0.45, stiffness MediumLow); hold 1100ms; fade 380ms FastOutSlowIn",
+        "purpose": "The one celebratory export moment."
+      },
+      {
+        "name": "intro-parallax",
+        "value": "scene translateX 0.35x page offset, copy 0.15x",
+        "purpose": "Intro chapters slide like letters out of an envelope."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "instant",
+        "purpose": "All loops and celebrations collapse under Remove animations."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sheet-3-up",
+        "value": "600dp",
+        "purpose": "Below: fixed 3-column stamp sheet; above: adaptive 150dp columns."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Airmail red pill with icon and label; the one action per view (Save PDF, Scan a document).",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 4v11M7 10l5 5 5-5M5 20h14\"/></svg>Save PDF</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:8px;height:56px;padding:0 24px;border:none;border-radius:999px;background:#D7262E;color:#fff;font-family:'Archivo',system-ui,sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:filter .15s}.ds-btn-primary:hover{filter:brightness(1.06)}.ds-btn-primary:focus-visible{outline:2.5px solid #D7262E;outline-offset:3px}.ds-btn-primary:active{filter:brightness(.94)}"
+    },
+    {
+      "name": "Outlined Button",
+      "kind": "button",
+      "refersTo": "button-outlined",
+      "description": "Hairline pill with icon and label for the secondary action beside the primary (Add pages, Share, Import).",
+      "html": "<button class=\"ds-btn-outlined\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg>Add pages</button>",
+      "css": ".ds-btn-outlined{display:inline-flex;align-items:center;gap:6px;height:54px;padding:0 22px;border:1.5px solid #DADAD3;border-radius:999px;background:transparent;color:#14161A;font-family:'Archivo',system-ui,sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:border-color .15s}.ds-btn-outlined:hover{border-color:#14161A}.ds-btn-outlined:focus-visible{outline:2.5px solid #D7262E;outline-offset:3px}"
+    },
+    {
+      "name": "Scan FAB",
+      "kind": "button",
+      "refersTo": "fab-scan",
+      "description": "Large red extended FAB, bottom-right on Home, 16dp clear of the banner.",
+      "html": "<button class=\"ds-fab\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M3.5 12h17\"/></svg>Scan</button>",
+      "css": ".ds-fab{display:inline-flex;align-items:center;gap:12px;height:64px;padding:0 24px;border:none;border-radius:20px;background:#D7262E;color:#fff;font-family:'Archivo',system-ui,sans-serif;font-weight:600;font-size:20px;box-shadow:0 3px 8px rgba(0,0,0,.18);cursor:pointer}.ds-fab:hover{filter:brightness(1.06)}.ds-fab:focus-visible{outline:2.5px solid #D7262E;outline-offset:3px}"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Outlined capsule on stamp paper with a leading search icon.",
+      "html": "<label class=\"ds-search\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"6\"/><path d=\"M20 20l-4.5-4.5\"/></svg><input placeholder=\"Search\"></label>",
+      "css": ".ds-search{display:flex;align-items:center;gap:10px;height:56px;padding:0 18px;border:1px solid #8E9199;border-radius:28px;background:#fff;color:#52565F;width:280px}.ds-search input{border:none;outline:none;background:transparent;font-family:'Archivo',system-ui,sans-serif;font-size:16px;color:#14161A;flex:1}.ds-search:focus-within{border:2px solid #D7262E}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "description": "Material filter chip with a check when on; export options and ink choice.",
+      "html": "<span class=\"ds-chip ds-chip-on\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>A4</span><span class=\"ds-chip\">Letter</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;margin-right:8px;border:1px solid #8E9199;border-radius:8px;font-family:'Archivo',system-ui,sans-serif;font-weight:500;font-size:14px;color:#52565F;cursor:pointer}.ds-chip:hover{background:#F1F1EC}.ds-chip-on{background:#E1E8F7;border-color:transparent;color:#0E2459}"
+    },
+    {
+      "name": "Envelope Card",
+      "kind": "card",
+      "refersTo": "envelope-card",
+      "description": "A document on Home: airmail chevron edge, tilted perforated thumbnail in its ink, mono meta, giant page count in its ink.",
+      "html": "<div class=\"ds-envelope\"><div class=\"ds-env-thumb\"></div><div class=\"ds-env-body\"><div class=\"ds-env-name\">Rental agreement</div><div class=\"ds-mono\">TODAY 4:42 PM · 413 KB</div></div><div class=\"ds-env-count\"><b>06</b><span class=\"ds-mono\">PAGES</span></div></div>",
+      "css": ".ds-envelope{position:relative;display:flex;align-items:center;gap:20px;width:340px;padding:14px 16px 14px 14px;background:#fff;border:1px solid #DADAD3;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.08);font-family:'Archivo',system-ui,sans-serif;}.ds-envelope::before{content:'';position:absolute;inset:0;border-radius:8px;padding:3.5px;background:repeating-linear-gradient(-45deg,#D7262E 0 10px,transparent 10px 14px,#1B3F8F 14px 24px,transparent 24px 28px);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}.ds-env-thumb{width:58px;height:76px;transform:rotate(-3deg);background:#fff;border:5px solid #fff;outline:3px solid #2F4FD8;outline-offset:-8px;box-shadow:0 1.5px 0 rgba(0,0,0,.08);flex:none}.ds-env-body{flex:1}.ds-env-name{font-weight:600;font-size:16px;color:#14161A;margin-bottom:6px}.ds-mono{font-family:'Martian Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.04em;color:#52565F}.ds-env-count{display:flex;flex-direction:column;align-items:flex-end}.ds-env-count b{font-family:'Archivo',sans-serif;font-stretch:62%;font-weight:900;font-size:50px;line-height:48px;color:#2F4FD8}.ds-envelope:hover{border-color:#8E9199}"
+    },
+    {
+      "name": "Page Stamp",
+      "kind": "custom",
+      "refersTo": "page-stamp",
+      "description": "A page as a perforated postage stamp with an ink frame and a denomination-style page number.",
+      "html": "<div class=\"ds-stamp\"><div class=\"ds-stamp-img\"></div><div class=\"ds-stamp-num\">01</div></div>",
+      "css": ".ds-stamp{width:120px;aspect-ratio:.74;padding:7px 7px 0;background:#fff;display:flex;flex-direction:column;-webkit-mask:radial-gradient(circle 3px at 4.5px 4.5px,transparent 98%,#000) -4.5px -4.5px/9px 9px;filter:drop-shadow(0 1.5px 0 rgba(0,0,0,.08))}.ds-stamp-img{flex:1;border:3px solid #E2452B;background:#fff}.ds-stamp-num{height:26px;display:flex;align-items:center;font-family:'Archivo',sans-serif;font-stretch:62%;font-weight:900;font-size:20px;color:#E2452B}"
+    },
+    {
+      "name": "Postmark",
+      "kind": "custom",
+      "description": "Rubber postmark: two rings, mono arc text, condensed date; 78% alpha; marks sent documents and the export moment.",
+      "html": "<div class=\"ds-postmark\"><span>3 NOV</span></div>",
+      "css": ".ds-postmark{width:96px;height:96px;border-radius:50%;border:2px solid rgba(215,38,46,.78);display:grid;place-items:center;transform:rotate(-14deg)}.ds-postmark span{width:60px;height:60px;border-radius:50%;border:1.2px solid rgba(215,38,46,.78);display:grid;place-items:center;font-family:'Archivo',sans-serif;font-stretch:62%;font-weight:900;font-size:15px;color:rgba(215,38,46,.78)}"
+    },
+    {
+      "name": "Airmail Band",
+      "kind": "custom",
+      "description": "6dp red/blue chevron band under the status bar; the brand edge.",
+      "html": "<div class=\"ds-band\"></div>",
+      "css": ".ds-band{height:6px;width:320px;background:repeating-linear-gradient(-45deg,#D7262E 0 13px,#FBFBF8 13px 19px,#1B3F8F 19px 32px,#FBFBF8 32px 38px)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Airmail Post",
+    "overview": "Docfold is postal stationery on a phone: envelopes, stamp sheets, rubber postmarks. Every document is a letter, its pages are perforated stamps, and the export is the moment it gets franked. The ground is envelope white by day and a blue-black \"sorting office\" at night; one airmail red carries every action, airmail blue carries structure, and each document wears one of six stamp inks wherever it appears.\n\nHierarchy comes from scale contrast alone: giant condensed-black numerals and titles against tiny Martian Mono data. Everything else is quiet Archivo set in sentence case, because clarity outranks expression: the path is always Scan, Arrange, Save PDF, and every action says what it does in words beside its icon. Expression lives in drawn material (perforations, chevron bands, postmarks, engraved plates), all of it cheap vector drawing that stays smooth on 2 GB phones.\n\nThe world refuses the category default: a blue Material list with grey thumbnails and a camera FAB that could belong to any scanner.",
+    "keyCharacteristics": [
+      "Envelope-white / sorting-office grounds with one red action colour and blue structure.",
+      "One stamp ink per document, carried on its thumbnail, page numerals and page-sheet frames.",
+      "Perforated stamp paper, the red/blue airmail chevron, and rubber postmarks as the material vocabulary.",
+      "Archivo Condensed Black for numerals and titles, Archivo for UI, Martian Mono only for data.",
+      "Authored 1.8-stroke icon set and engraved illustrations drawn in code, no raster art."
+    ],
+    "rules": [
+      {
+        "name": "The One Red Rule",
+        "body": "Airmail red means \"do this\". It goes on the primary action and on brand edges (band, chevron, postmark), never on decoration that competes with the action.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Belongs To The Document Rule",
+        "body": "A stamp ink identifies one document and travels with it everywhere it appears. Never use a stamp ink as a general UI accent or for status.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scale Contrast Rule",
+        "body": "Hierarchy comes from size jumps (64sp masthead against 10sp mono), not from colour or extra weights.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono Is Data Rule",
+        "body": "Martian Mono is only for dates, sizes and counts. Instructions, labels and actions are Archivo in sentence case; uppercase appears only inside mono data.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Banner Rule",
+        "body": "The only ad placements are an anchored adaptive banner at the bottom of Home and Document, and one interstitial when leaving a document after an export (at most once per 150 s). The banner takes no space until loaded, then sits behind a hairline divider and a 6dp gap, and primary actions keep at least 16dp clear space above it. No ads in capture, crop, page editing or the export sheet.",
+        "section": "layout"
+      },
+      {
+        "name": "The Thumb-Safe Edge Rule",
+        "body": "Draggable controls near screen edges (crop handles, 64dp grab areas) claim `systemGestureExclusion` so the back gesture never steals them.",
+        "section": "layout"
+      },
+      {
+        "name": "The Never-Shadow-A-Perforation Rule",
+        "body": "Never give a perforated (concave) outline Material elevation, `shadowElevation`, or a `graphicsLayer` shadow. Android tessellates concave shadows on the render thread, which took seconds per frame and froze the app (ANR). Perforated paper is drawn with `perforatedPaper`: the path is built once in `drawWithCache` and the shadow is stacked translucent fills of that same path.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No-Blur Rule",
+        "body": "No blur, no heavy shaders. Depth is drawn with paths and alpha so every frame holds on a 2 GB phone.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do pair every action icon with a text label, and write instructions in sentence-case Archivo.",
+      "Do keep Martian Mono for dates, sizes and counts only.",
+      "Do give each document one stamp ink and use it on its thumbnail frame, numerals and selection.",
+      "Do draw perforated paper with `perforatedPaper` (cached path, stacked translucent fills).",
+      "Do keep the airmail red for the primary action and brand edges; use the night red with engraving-ink labels in dark theme.",
+      "Do keep 48dp minimum targets and at least 16dp clear space between primary actions and the banner.",
+      "Do claim `systemGestureExclusion` on edge-adjacent drag handles.",
+      "Do let every looping or celebratory motion collapse to an instant state under Remove animations."
+    ],
+    "donts": [
+      "Don't give a perforated (concave) outline elevation, `shadowElevation`, or a `graphicsLayer` shadow; it freezes the render thread.",
+      "Don't use blur, heavy shaders, or raster illustration; draw scenes in code on the 320-unit grid.",
+      "Don't use a stamp ink as a generic accent or status colour.",
+      "Don't use icon-only buttons for actions, or uppercase/mono text for instructions.",
+      "Don't place ads in capture, crop, editing or the export sheet, or show an interstitial anywhere but leaving a document after an export.",
+      "Don't fall back to a blue Material list with grey thumbnails and an anonymous camera FAB."
+    ]
+  }
+}

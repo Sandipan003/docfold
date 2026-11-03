@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 7 launchers (no adaptive icons): the same mark on a rounded red tile. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#D7262E" android:pathData="M24,6h60a18,18 0,0 1,18 18v60a18,18 0,0 1,-18 18h-60a18,18 0,0 1,-18 -18v-60a18,18 0,0 1,18 -18z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M33,24H64L76,36V84H33Z"/>
+    <path android:fillColor="#F4C2C4" android:pathData="M64,24V36H76Z"/>
+    <path android:fillColor="#14161A" android:pathData="M39,41h19v4h-19z"/>
+    <path android:fillColor="#B8BBC2" android:pathData="M39,50h30v2.6h-30zM39,56h26v2.6h-26zM39,62h29v2.6h-29z"/>
+    <path android:fillColor="#1B3F8F" android:pathData="M33,78l4,-6h6l-4,6zM51,78l4,-6h6l-4,6zM69,78l4,-6h3v4.5l-1,1.5z"/>
+    <path android:fillColor="#D7262E" android:pathData="M42,78l4,-6h6l-4,6zM60,78l4,-6h6l-4,6z"/>
+</vector>

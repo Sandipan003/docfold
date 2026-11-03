@@ -1,0 +1,17 @@
+# Secrets
+android/keys.properties
+*.jks
+*.keystore
+# Builds
+android/.gradle/
+android/build/
+android/app/build/
+android/.kotlin/
+android/local.properties
+website/.next/
+website/node_modules/
+website/.vercel/
+.DS_Store
+
+# Local env (Vercel OIDC token)
+website/.env*.local

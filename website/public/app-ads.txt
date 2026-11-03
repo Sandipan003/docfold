@@ -1,0 +1,3 @@
+# app-ads.txt for Docfold, published by Sandipan Sarkar.
+# Lets AdMob confirm that ads in the Docfold app are authorised.
+google.com, pub-7976242341858407, DIRECT, f08c47fec0942fa0

@@ -1,0 +1,14 @@
+# Copy this file to keys.properties (same folder) and fill it in. keys.properties is git-ignored: never share it.
+# Release builds refuse to run until every value is set, so a test-ad build can't reach Google Play by accident.
+
+# AdMob → Apps → (your app) → App settings → App ID
+ADMOB_APP_ID=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+# AdMob → Apps → (your app) → Ad units → "Banner" (adaptive) and "Interstitial"
+ADMOB_BANNER_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_INTERSTITIAL_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+
+# Upload key (create it once with the keytool command in PUBLISHING.md, and back it up somewhere safe)
+STORE_FILE=docfold-upload.jks
+STORE_PASSWORD=
+KEY_ALIAS=docfold
+KEY_PASSWORD=
