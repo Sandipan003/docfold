@@ -85,7 +85,8 @@ fun AppRoot(vm: AppViewModel, activity: MainActivity) {
         val scanLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { r ->
             vm.addImages(target, Scanner.pages(r.resultCode, r.data))
         }
-        val photosLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(50)) { vm.addImages(target, it) }
+        // No cap of our own: the system photo picker's limit applies.
+        val photosLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { vm.addImages(target, it) }
         val pdfLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let { vm.addPdf(target, it) } }
 
         val actions = remember {

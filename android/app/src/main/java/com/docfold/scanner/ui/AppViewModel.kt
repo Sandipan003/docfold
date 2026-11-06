@@ -116,12 +116,15 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         if (uris.isEmpty()) return
         work("Adding pages") {
             val doc = docId?.let { store.get(it) } ?: store.create()
-            val result = store.addImages(doc.id, uris, progress("Adding pages")) ?: return@work
+            val added = try { store.addImages(doc.id, uris, progress("Adding pages")) } finally { discardScannerCopies(uris) }
+            val result = added ?: return@work
             if (result.pages.size == doc.pages.size) {
                 notify(if (uris.size == 1) "Couldn't read that image." else "Couldn't read those images.")
                 if (docId == null) store.deleteDoc(doc.id)
                 return@work
             }
+            val addedCount = result.pages.size - doc.pages.size
+            if (addedCount < uris.size) notify("Added $addedCount of ${uris.size} pages. ${uris.size - addedCount} couldn't be read.")
             showDoc(doc.id, newDoc = docId == null)
             if (cropNew) open(Screen.Crop(doc.id, result.pages.last().id, isNew = true))
         }
@@ -140,6 +143,17 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             }
             showDoc(doc.id, newDoc = docId == null)
         }
+    }
+
+    /**
+     * Google's scanner hands back pages as files in our cache and leaves them there. Once copied into the document
+     * they are duplicates, so remove them. Only file:// Uris inside our own cache are touched.
+     */
+    private suspend fun discardScannerCopies(uris: List<Uri>) = withContext(Dispatchers.IO) {
+        val cache = ctx.cacheDir.canonicalPath + File.separator
+        uris.filter { it.scheme == "file" }.mapNotNull { it.path?.let(::File) }
+            .filter { runCatching { it.canonicalPath.startsWith(cache) }.getOrDefault(false) }
+            .forEach { it.delete() }
     }
 
     private fun showDoc(docId: String, newDoc: Boolean) {

@@ -93,16 +93,29 @@ class DocStore(private val context: Context) {
         }
     }
 
-    /** Imports images in order. [onProgress] gets (done, total). Unreadable images are skipped. */
+    /**
+     * Imports images in order. [onProgress] gets (done, total). Unreadable images are skipped. Pages are saved every
+     * [SAVE_EVERY] images and again if the import fails, so stopping part-way keeps what was already imported.
+     */
     suspend fun addImages(docId: String, uris: List<Uri>, onProgress: (Int, Int) -> Unit = { _, _ -> }): Doc? = lock.withLock {
         withContext(io) {
-            val doc = get(docId) ?: return@withContext null
+            var doc = get(docId) ?: return@withContext null
             val added = ArrayList<Page>()
-            uris.forEachIndexed { i, uri ->
-                ImageIO.decodeUri(context, uri)?.let { bmp -> added += savePage(docId, bmp) }
-                onProgress(i + 1, uris.size)
+            fun save() {
+                doc = write(doc.copy(pages = doc.pages + added, updated = System.currentTimeMillis()))
+                added.clear()
             }
-            write(doc.copy(pages = doc.pages + added, updated = System.currentTimeMillis()))
+            try {
+                uris.forEachIndexed { i, uri ->
+                    val bmp = try { ImageIO.decodeUri(context, uri) } catch (e: Exception) { null } catch (e: OutOfMemoryError) { null }
+                    if (bmp != null) added += savePage(docId, bmp)
+                    if (added.size == SAVE_EVERY) save()
+                    onProgress(i + 1, uris.size)
+                }
+            } finally {
+                save()
+            }
+            doc
         }
     }
 
@@ -242,5 +255,6 @@ class DocStore(private val context: Context) {
 
     companion object {
         const val STAMP_COLORS = 6
+        private const val SAVE_EVERY = 10
     }
 }

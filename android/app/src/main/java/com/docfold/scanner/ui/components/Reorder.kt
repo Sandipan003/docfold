@@ -1,5 +1,6 @@
 package com.docfold.scanner.ui.components
 
+import android.os.SystemClock
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
@@ -40,6 +41,7 @@ class GridReorder internal constructor(
         private set
     private var scrollJob: Job? = null
     private var pointer = Offset.Zero
+    private var edgeSince = 0L
 
     private fun LazyGridItemInfo.contains(p: Offset) =
         p.x >= offset.x && p.x <= offset.x + size.width && p.y >= offset.y && p.y <= offset.y + size.height
@@ -65,9 +67,12 @@ class GridReorder internal constructor(
             else -> 0f
         }
         scrollJob?.cancel()
+        if (speed == 0f) edgeSince = 0L else if (edgeSince == 0L) edgeSince = SystemClock.uptimeMillis()
         if (speed != 0f) scrollJob = scope.launch {
             while (isActive && draggingKey != null) {
-                val used = grid.scrollBy(speed)
+                // Holding at the edge speeds up (up to 4×), so a page can cross a 100+ page document in seconds.
+                val boost = (1f + (SystemClock.uptimeMillis() - edgeSince) / 1000f).coerceAtMost(4f)
+                val used = grid.scrollBy(speed * boost)
                 offset += Offset(0f, used)
                 swapIfNeeded(key)
                 if (used == 0f) break
@@ -87,6 +92,7 @@ class GridReorder internal constructor(
 
     internal fun end() {
         scrollJob?.cancel()
+        edgeSince = 0L
         if (draggingKey != null) onEnd()
         draggingKey = null
         offset = Offset.Zero
