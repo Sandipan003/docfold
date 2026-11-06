@@ -17,6 +17,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -217,6 +219,11 @@ class DocStore(private val context: Context) {
 
     suspend fun markSent(docId: String) = mutate(docId) { it.copy(sentAt = System.currentTimeMillis()) }
 
+    /** Files documents under [folder] (empty for none). Filing isn't an edit, so their dates and order stay put. */
+    suspend fun setFolder(docIds: Collection<String>, folder: String) = lock.withLock {
+        withContext(io) { docIds.forEach { id -> get(id)?.let { write(it.copy(folder = folder.trim())) } } }
+    }
+
     // ── Whole documents ─────────────────────────────────────────────────────────────────────────────
 
     suspend fun deleteDoc(docId: String) = lock.withLock {
@@ -235,6 +242,33 @@ class DocStore(private val context: Context) {
         val made = copyInto(name, doc.pages.filter { it.id in pageIds }.map { docId to it })
         if (move && made != null) deletePages(docId, pageIds)
         return made
+    }
+
+    /** Writes every document to [out] as one backup file. [onProgress] gets (done, total) documents. */
+    suspend fun backup(out: OutputStream, onProgress: (Int, Int) -> Unit) = lock.withLock {
+        withContext(io) { Backup.write(root, out, onProgress) }
+    }
+
+    /** Brings back the documents in a backup that aren't on this phone. Returns how many were added and already here. */
+    suspend fun restore(input: InputStream): Pair<Int, Int> = lock.withLock {
+        withContext(io) {
+            val staging = File(context.cacheDir, "restore")
+            try {
+                var added = 0
+                var here = 0
+                Backup.read(input, staging, root.usableSpace - SPACE_TO_KEEP).forEach { found ->
+                    val target = dir(found.name)
+                    when {
+                        target.exists() -> here++
+                        found.renameTo(target) || found.copyRecursively(target) -> added++
+                    }
+                }
+                load()
+                added to here
+            } finally {
+                staging.deleteRecursively()
+            }
+        }
     }
 
     private suspend fun copyInto(name: String, pages: List<Pair<String, Page>>): Doc? = lock.withLock {
@@ -256,5 +290,6 @@ class DocStore(private val context: Context) {
     companion object {
         const val STAMP_COLORS = 6
         private const val SAVE_EVERY = 10
+        private const val SPACE_TO_KEEP = 50_000_000L
     }
 }

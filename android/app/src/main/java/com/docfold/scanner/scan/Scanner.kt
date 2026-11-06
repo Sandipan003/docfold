@@ -13,7 +13,7 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 
 /**
  * Google's on-device document scanner (edge detection, auto-capture, perspective fix, clean-up),
- * delivered by Play services so it adds almost nothing to the app's size and needs no camera permission.
+ * delivered by Play services so it adds almost nothing to the app's size. Docfold still asks for the camera first.
  * Phones it doesn't support (under ~1.7 GB RAM or without Play services) fall back to the system camera
  * plus Docfold's own corner crop.
  */

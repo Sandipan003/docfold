@@ -29,6 +29,7 @@ SCAN
 ARRANGE
 • Every page sits in a sheet like postage stamps — hold and drag to reorder
 • Crop, rotate, duplicate, delete, or move pages into a new document
+• Folders keep your documents tidy
 • Filters: Magic (clean white paper), Grayscale, Black & White
 • Sign with your finger and place the signature anywhere on the page
 
@@ -49,11 +50,26 @@ MORE
 • Light and dark themes
 
 PRIVATE BY DESIGN
-Your scans are stored only on your phone. Docfold has no account and no cloud, and it does not ask for camera, storage, contacts or location permission. Scanning and text recognition run on your device.
+Your scans are stored only on your phone. Docfold has no account and no cloud. It asks for the camera only to scan and for storage only to save your files, and it never asks for contacts or location. Scanning and text recognition run on your device.
 
 Docfold is supported by ads. Ads never interrupt scanning or editing.
 
 Questions or ideas? Write to us at the email below.
+```
+
+## What's new (next release)
+
+```
+<en-GB>
+• Back up all your documents to one file, and restore them on a new phone
+• Folders to keep documents tidy
+• Exact upload sizes: 100 KB, 50 KB, or any size you type
+• Resize a photo or signature to the exact pixels and KB a form asks for
+• Name a document from the words on its first page
+• Print from your phone
+• Docfold now asks before using the camera and before saving files
+• Clearer dark mode and many small design improvements
+</en-GB>
 ```
 
 ## What's new (release notes, v1.0.0)

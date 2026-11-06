@@ -65,12 +65,16 @@ Google Play rule found during research: from **31 Aug 2026**, new apps and updat
 
 ---
 
+Full feedback and competitor research (Nov 2026): `reports/Document scanner feature gaps 2026.md`, kept locally and not in this repo. Main finding: complaints centre on charges, ads and lost work, not missing scan features. Still open from it: a one-time remove-ads purchase, full scanner cleanup on low-RAM phones, Hindi OCR.
+
+---
+
 ## 5. What was built
 
 ### 5.1 The app — `android/`
 
 **Features**
-- **Scan:** Google ML Kit Document Scanner (edge detection, auto-capture, perspective fix, shadow and stain removal), delivered by Play services so it adds almost nothing to the app size and needs **no camera permission**. A **"Basic camera"** fallback (system camera + Docfold's own 4-corner perspective crop) for phones without Google's scanner or when offline.
+- **Scan:** Google ML Kit Document Scanner (edge detection, auto-capture, perspective fix, shadow and stain removal), delivered by Play services so it adds almost nothing to the app size. Docfold asks for the camera before the first scan. A **"Basic camera"** fallback (system camera + Docfold's own 4-corner perspective crop) for phones without Google's scanner or when offline.
 - **Import:** photos (Android photo picker, no storage permission) and PDFs (each page becomes a page — also how PDFs are **merged**). "Share to Docfold" from the gallery, WhatsApp and so on.
 - **Arrange:** pages shown as **perforated postage stamps** in a 3-column sheet; **hold and drag to reorder**; select mode to rotate, duplicate, move to a new document or delete; merge whole documents; rename; search.
 - **Edit a page:** crop (with perspective fix), filters **Magic / Grayscale / B&W** (custom shadow-removal algorithm), rotate (lossless), **finger signature** (black or blue ink, saved for reuse), **Get text** (on-device OCR, copy/share), delete.
@@ -90,7 +94,7 @@ Google Play rule found during research: from **31 Aug 2026**, new apps and updat
 - Image sizes adapt to the phone's RAM; thumbnails decoded two at a time into a heap-sized memory cache.
 - Release build is R8-minified: **3.9 MB APK**, ~0.8 s cold start on the emulator. AAB is 9.4 MB (Play delivers ~4 MB per phone).
 - Minimum Android 7.0 (API 24, required by the text-recognition library); targets Android 16 (API 36).
-- Permissions: only internet/network state and the advertising ID (all from the AdMob SDK).
+- Permissions: camera (asked before the first scan); storage on Android 7–12 (asked before the first save); on Android 13+, which has no storage permission for saving, Docfold asks itself. Plus internet/network state and the advertising ID from the AdMob SDK.
 
 **Main files**
 ```

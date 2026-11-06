@@ -3,6 +3,8 @@ package com.docfold.scanner.ui.screens
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -32,17 +35,24 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.docfold.scanner.BuildConfig
 import com.docfold.scanner.Links
 import com.docfold.scanner.MainActivity
 import com.docfold.scanner.ads.Ads
 import com.docfold.scanner.ui.AppViewModel
+import com.docfold.scanner.ui.LocalAccess
+import com.docfold.scanner.ui.LocalSnackbar
+import com.docfold.scanner.ui.storagePermission
 import com.docfold.scanner.ui.components.AirmailBand
 import com.docfold.scanner.ui.theme.DocIcons
 import com.docfold.scanner.ui.theme.Mono
@@ -53,9 +63,18 @@ import com.docfold.scanner.ui.theme.ThemeMode
 fun SettingsScreen(vm: AppViewModel, activity: MainActivity) {
     val context = LocalContext.current
     val docs by vm.store.docs.collectAsState()
+    val access = LocalAccess.current
+    // Permissions change outside the app, so re-read them each time Settings comes back on screen.
+    var returns by remember { mutableIntStateOf(0) }
+    LifecycleResumeEffect(Unit) { returns++; onPauseOrDispose { } }
+    val cameraOn = remember(returns) { access.cameraAllowed }
+    val savingOn = remember(returns, vm.savingAllowed) { access.savingAllowed }
+    val backupFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri -> uri?.let(vm::backupTo) }
+    val restoreFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::restoreFrom) }
     fun open(url: String) = try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } catch (e: ActivityNotFoundException) { vm.notify("No browser found.") }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(LocalSnackbar.current) },
         topBar = {
             TopAppBar(
                 navigationIcon = { IconButton({ vm.back() }) { Icon(DocIcons.Back, "Back") } },
@@ -77,6 +96,31 @@ fun SettingsScreen(vm: AppViewModel, activity: MainActivity) {
             Section("Your documents")
             Item(DocIcons.Shield, "Stored only on this phone", "${plural(docs.orEmpty().size, "document")} · ${formatSize(vm.storageBytes())}. No account, no cloud. Uninstalling the app deletes them.")
             Item(DocIcons.Info, "Replay the introduction", null) { vm.replayIntro() }
+
+            Section("Backup")
+            Item(DocIcons.Download, "Back up all documents", "Saves them to one file. Keep it off this phone, so a lost phone doesn't lose them.") {
+                if (docs.isNullOrEmpty()) vm.notify("Nothing to back up yet.") else backupFile.launch(vm.backupName())
+            }
+            Item(DocIcons.Open, "Restore from a backup", "Adds the documents from a backup file to this phone.") {
+                restoreFile.launch(arrayOf("application/zip", "application/octet-stream"))
+            }
+
+            Section("Permissions")
+            Item(
+                DocIcons.Camera, "Camera",
+                if (cameraOn) "Allowed. Used only to scan your pages." else "Not allowed. Scanning stays off until you allow it.",
+            ) { if (cameraOn) access.openAppSettings() else access.camera { returns++ } }
+            Item(
+                DocIcons.Download, "Saving to this phone",
+                if (savingOn) "Allowed. PDFs go to Downloads › Docfold." else "Not allowed. Docfold asks where to save each PDF.",
+            ) {
+                val android = storagePermission() != null
+                when {
+                    savingOn && android -> access.openAppSettings()
+                    savingOn -> vm.allowSaving(false)
+                    else -> access.saving({ returns++ }, { if (android) access.openAppSettings() })
+                }
+            }
 
             Section("Privacy")
             if (Ads.privacyOptionsRequired) Item(DocIcons.Settings, "Ad privacy choices", "Change what you agreed to for ads") { Ads.showPrivacyOptions(activity) }

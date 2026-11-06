@@ -130,6 +130,8 @@ fun PageStamp(
 ) {
     // Stamps stay paper-light in the dark theme too, a step above the ground so they never sink into it.
     val paper = if (LocalDark.current) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerLowest
+    // White on the day inks, near-black on the bright night inks: either way it stays readable on a selected stamp.
+    val onInk = MaterialTheme.colorScheme.surfaceContainerLowest
     Box(
         modifier
             .aspectRatio(0.74f)
@@ -149,11 +151,11 @@ fun PageStamp(
             Row(Modifier.fillMaxWidth().height(26.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     number.toString().padStart(2, '0'),
-                    color = if (selected) Color.White else ink,
+                    color = if (selected) onInk else ink,
                     style = MaterialTheme.typography.headlineSmall.copy(fontFamily = ArchivoCondensed, fontSize = 20.sp),
                 )
                 Spacer(Modifier.weight(1f))
-                EditMarks(page, if (selected) Color.White else ink)
+                EditMarks(page, if (selected) onInk else ink)
             }
         }
     }

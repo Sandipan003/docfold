@@ -24,7 +24,7 @@ Docfold scans pages with the phone camera, lets the user arrange them (reorder, 
 Competitor review research (Nov 2026) found the paywalled or complained-about features users want free:
 
 - Watermark on free PDFs (CamScanner) → never a watermark.
-- OCR / text extraction and searchable PDFs paywalled (CamScanner, Genius Scan Plus, SwiftScan) → free, on-device.
+- OCR / text extraction and searchable PDFs paywalled (CamScanner, Genius Scan Ultra, SwiftScan) → free, on-device.
 - Hard scan limits, ads between every scanned page (SwiftScan, CamScanner) → unlimited; no ads inside the scan flow.
 - Account sign-in required, cloud upload (Adobe Scan) → no account, nothing leaves the phone.
 - Combine files, fill & sign paywalled (Adobe → Acrobat Pro) → merge documents, import PDFs, signatures free.
@@ -44,7 +44,10 @@ Scanning happens standing up, one-handed, under poor indoor light, often in a hu
 - Export: custom PDF writer that embeds JPEGs directly (small files, low memory); page size Auto/A4/Letter/Legal, margins, quality/compression, 1 or 2 pages per sheet (ID cards), optional AES-256 password, optional searchable text layer (OCR). Also export JPG images. Save via the system file picker or share.
 - OCR text extraction (ML Kit, on-device), copy/share text.
 - Signature: draw once, place on a page.
-- No dangerous permissions required at all.
+- Backup: every document to one user-saved zip, restored by adding what isn't already on the phone. Android backup stays off, so this is the only way documents survive a lost phone.
+- Forms: size targets down to any custom KB, verified against the real file; a Resize tool makes an exact-pixel JPEG between a Min and Max KB. Presets are starting points and never claim a portal will accept the result.
+- Folders: one level, stored as a field in doc.json. Print through Android. Rename can use the first line of page 1.
+- Permissions are asked for the first time each is needed: camera on every Android version; storage on Android 7–12; on Android 13+, where no such permission exists, Docfold asks itself before saving to Downloads. READ_MEDIA_IMAGES is deliberately not used (Play restricts it; the photo picker needs no permission). The user requires the app to ask.
 - Google Play: target API 36 (required for new apps from Aug 31 2026), minSdk 23 (AdMob SDK minimum), 16 KB page-size compatible, R8 + resource shrinking, AAB.
 - Name verified unused on Google Play (Nov 2026): "Docfold". "Pagefold" is taken.
 

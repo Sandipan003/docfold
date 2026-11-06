@@ -7,5 +7,5 @@ export const site = {
   developer: "Sandipan Sarkar", // exactly as on the Google Play developer account
   email: "sarkarsandipan423@gmail.com",
   playUrl: "https://play.google.com/store/apps/details?id=com.docfold.scanner",
-  policyDate: "3 November 2026",
+  policyDate: "6 November 2026",
 } as const;

@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,11 +26,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -89,8 +93,15 @@ fun HomeScreen(vm: AppViewModel, actions: AddActions) {
     var showAdd by remember { mutableStateOf(false) }
     val selected = remember { mutableStateListOf<String>() }
     var confirmDelete by remember { mutableStateOf(false) }
-    val docs = remember(all, query, vm.hiddenDocs.toList()) {
-        all.orEmpty().filter { it.id !in vm.hiddenDocs && (query.isBlank() || it.name.contains(query.trim(), ignoreCase = true)) }
+    var filing by remember { mutableStateOf(false) }
+    var folder by rememberSaveable { mutableStateOf<String?>(null) }
+    val folders = remember(all) { vm.folders() }
+    // A folder lasts only while a document is in it, so its filter can outlive it.
+    LaunchedEffect(folders) { if (folder !in folders) folder = null }
+    val docs = remember(all, query, folder, vm.hiddenDocs.toList()) {
+        all.orEmpty().filter {
+            it.id !in vm.hiddenDocs && (folder == null || it.folder == folder) && (query.isBlank() || it.name.contains(query.trim(), ignoreCase = true))
+        }
     }
     val list = rememberLazyListState()
 
@@ -106,7 +117,7 @@ fun HomeScreen(vm: AppViewModel, actions: AddActions) {
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     // Clear space above the banner so a hurried thumb never lands on the ad.
-                    modifier = Modifier.padding(bottom = 16.dp).height(64.dp),
+                    modifier = Modifier.padding(bottom = 16.dp).height(64.dp).semantics { contentDescription = "Scan" },
                 )
             }
         },
@@ -120,11 +131,11 @@ fun HomeScreen(vm: AppViewModel, actions: AddActions) {
             item(key = "head") {
                 Column(Modifier.statusBarsPadding()) {
                     AirmailBand()
-                    if (selected.isEmpty()) Header(vm, all.orEmpty(), query, { query = it }, onImport = { showAdd = true })
+                    if (selected.isEmpty()) Header(vm, all.orEmpty(), query, { query = it }, folders, folder, { folder = it }, onImport = { showAdd = true })
                     else SelectionBar(selected.size, onClose = { selected.clear() }, onMerge = {
                         val order = all.orEmpty().filter { it.id in selected }.sortedBy { it.created }.map { it.id }
                         selected.clear(); vm.merge(order)
-                    }, onDelete = { confirmDelete = true })
+                    }, onFolder = { filing = true }, onDelete = { confirmDelete = true })
                 }
             }
             when {
@@ -152,6 +163,11 @@ fun HomeScreen(vm: AppViewModel, actions: AddActions) {
     }
 
     if (showAdd) AddPagesSheet({ showAdd = false }, { actions.scan(null) }, { actions.photos(null) }, { actions.pdf(null) }, { actions.camera(null) })
+    if (filing) FolderDialog(folders, "", { filing = false }) { target ->
+        vm.moveToFolder(selected.toList(), target)
+        selected.clear()
+        filing = false
+    }
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
@@ -164,11 +180,14 @@ fun HomeScreen(vm: AppViewModel, actions: AddActions) {
 }
 
 @Composable
-private fun Header(vm: AppViewModel, docs: List<Doc>, query: String, onQuery: (String) -> Unit, onImport: () -> Unit) {
+private fun Header(
+    vm: AppViewModel, docs: List<Doc>, query: String, onQuery: (String) -> Unit,
+    folders: List<String>, folder: String?, onFolder: (String?) -> Unit, onImport: () -> Unit,
+) {
     Column(Modifier.padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 8.dp)) {
         Row(verticalAlignment = Alignment.Top) {
             Text("Docfold", style = MaterialTheme.typography.displayLarge, modifier = Modifier.weight(1f).padding(top = 4.dp))
-            TextButton(onClick = { vm.open(Screen.Settings) }, modifier = Modifier.padding(top = 6.dp)) {
+            TextButton(onClick = { vm.open(Screen.Settings) }, modifier = Modifier.padding(top = 6.dp), colors = quietTextButton()) {
                 Icon(DocIcons.Settings, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text("Settings")
             }
         }
@@ -196,17 +215,30 @@ private fun Header(vm: AppViewModel, docs: List<Doc>, query: String, onQuery: (S
                     Icon(DocIcons.Images, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Import")
                 }
             }
+            if (folders.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(folder == null, { onFolder(null) }, { Text("All") }, leadingIcon = checkIf(folder == null))
+                    folders.forEach { f -> FilterChip(folder == f, { onFolder(f) }, { Text(f) }, leadingIcon = checkIf(folder == f)) }
+                    Spacer(Modifier.width(4.dp))
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun SelectionBar(count: Int, onClose: () -> Unit, onMerge: () -> Unit, onDelete: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClose) { Icon(DocIcons.Close, "Cancel selection") }
-        Text("$count selected", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
-        TextButton(onClick = onMerge, enabled = count >= 2) { Icon(DocIcons.Merge, null); Spacer(Modifier.width(6.dp)); Text("Merge") }
-        TextButton(onClick = onDelete) { Icon(DocIcons.Delete, null); Spacer(Modifier.width(6.dp)); Text("Delete") }
+private fun SelectionBar(count: Int, onClose: () -> Unit, onMerge: () -> Unit, onFolder: () -> Unit, onDelete: () -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClose) { Icon(DocIcons.Close, "Cancel selection") }
+            Text("$count selected", style = MaterialTheme.typography.headlineMedium)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            TextButton(onClick = onMerge, enabled = count >= 2) { Icon(DocIcons.Merge, null); Spacer(Modifier.width(6.dp)); Text("Merge") }
+            TextButton(onClick = onFolder) { Icon(DocIcons.Folder, null); Spacer(Modifier.width(6.dp)); Text("Folder") }
+            TextButton(onClick = onDelete) { Icon(DocIcons.Delete, null); Spacer(Modifier.width(6.dp)); Text("Delete") }
+        }
     }
 }
 
@@ -263,7 +295,7 @@ private fun Envelope(vm: AppViewModel, doc: Doc, selected: Boolean, onClick: () 
                 }
                 if (selected) {
                     Surface(shape = RoundedCornerShape(50), color = ink, modifier = Modifier.size(24.dp).align(Alignment.TopStart)) {
-                        Icon(DocIcons.Check, null, tint = Color.White, modifier = Modifier.padding(4.dp))
+                        Icon(DocIcons.Check, null, tint = MaterialTheme.colorScheme.surfaceContainerLowest, modifier = Modifier.padding(4.dp))
                     }
                 }
             }

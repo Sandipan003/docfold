@@ -27,6 +27,8 @@ object DocIcons {
 
     val Scan by lazy { icon("scan", "M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M3.5 12h17") }
     val Add by lazy { icon("add", "M12 5v14M5 12h14") }
+    val Folder by lazy { icon("folder", "M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l2 2.2H19a1.5 1.5 0 0 1 1.5 1.5v7.8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5Z") }
+    val Print by lazy { icon("print", "M7 8V4h10v4M7 17H5.5A1.5 1.5 0 0 1 4 15.5v-5A2.5 2.5 0 0 1 6.5 8h11a2.5 2.5 0 0 1 2.5 2.5v5a1.5 1.5 0 0 1-1.5 1.5H17M7 14h10v6H7Z") }
     val Back by lazy { icon("back", "M19 12H5M11 6l-6 6 6 6") }
     val Close by lazy { icon("close", "M6 6l12 12M18 6L6 18") }
     val Check by lazy { icon("check", "M5 12.5l4.5 4.5L19 7") }

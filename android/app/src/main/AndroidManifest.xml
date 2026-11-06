@@ -2,8 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- No camera or storage permission: ML Kit's scanner and the system camera/photo picker handle access. -->
+    <!-- Asked for the first time each is needed (ui/Access.kt). Android 13+ has no permission for saving files, so
+         neither storage permission applies there. READ_MEDIA_IMAGES stays out: Play restricts it, and the photo picker
+         needs no permission at all. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- CAMERA would otherwise imply autofocus is required, hiding the app from fixed-focus phones. -->
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
         android:name=".DocfoldApp"

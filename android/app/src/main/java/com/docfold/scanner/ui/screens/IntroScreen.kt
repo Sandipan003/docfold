@@ -5,13 +5,13 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.docfold.scanner.ui.theme.LocalDark
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.docfold.scanner.ui.components.AirmailBand
 import com.docfold.scanner.ui.components.EnvelopeScene
 import com.docfold.scanner.ui.components.PaperPileScene
@@ -47,7 +49,7 @@ import com.docfold.scanner.ui.components.ScanScene
 import com.docfold.scanner.ui.components.StampSheetScene
 import com.docfold.scanner.ui.theme.AirmailRed
 import com.docfold.scanner.ui.theme.DocIcons
-import com.docfold.scanner.ui.theme.LocalInks
+import com.docfold.scanner.ui.theme.LightInks
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -66,7 +68,10 @@ fun IntroScreen(onDone: (scanNow: Boolean) -> Unit) {
     val pager = rememberPagerState { chapters.size }
     val scope = rememberCoroutineScope()
     val last = pager.currentPage == chapters.lastIndex
-    val inks = LocalInks.current.all
+    // The scenes are white paper on a saturated field in both themes, so they keep the day inks.
+    val inks = LightInks.all
+    // Two title lines and three body lines at the phone's font size; the scene takes whatever height is left.
+    val textHeight = with(LocalDensity.current) { 160.sp.toDp() } + 52.dp
     // White status-bar icons on the saturated fields (dark on the light saffron one); restored on leaving.
     val view = LocalView.current
     val dark = LocalDark.current
@@ -81,13 +86,12 @@ fun IntroScreen(onDone: (scanNow: Boolean) -> Unit) {
         }
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        BoxWithConstraints(Modifier.weight(1f)) {
-            val fieldHeight = maxHeight * 0.58f
+        Box(Modifier.weight(1f)) {
             HorizontalPager(pager, Modifier.fillMaxSize()) { i ->
                 val c = chapters[i]
                 val shift = pagerOffset(pager, i)
                 Column(Modifier.fillMaxSize()) {
-                    Box(Modifier.fillMaxWidth().height(fieldHeight).background(c.field)) {
+                    Box(Modifier.fillMaxWidth().weight(1f).background(c.field)) {
                         // The scene drifts slower than the page: a little depth for free.
                         Box(Modifier.fillMaxSize().statusBarsPadding().padding(top = 36.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
                             .graphicsLayer { translationX = shift * size.width * 0.35f; alpha = 1f - shift.absoluteValue * 0.6f }) {
@@ -99,7 +103,7 @@ fun IntroScreen(onDone: (scanNow: Boolean) -> Unit) {
                             }
                         }
                     }
-                    Column(Modifier.padding(horizontal = 24.dp).padding(top = 26.dp).graphicsLayer { translationX = shift * size.width * 0.15f }) {
+                    Column(Modifier.heightIn(min = textHeight).padding(horizontal = 24.dp).padding(top = 26.dp).graphicsLayer { translationX = shift * size.width * 0.15f }) {
                         Text(c.title, style = MaterialTheme.typography.displayMedium)
                         Spacer(Modifier.height(14.dp))
                         Text(c.body, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -129,7 +133,7 @@ fun IntroScreen(onDone: (scanNow: Boolean) -> Unit) {
                 if (last) { Icon(DocIcons.Scan, null, Modifier.size(24.dp)); Spacer(Modifier.width(10.dp)) }
                 Text(if (last) "Scan my first page" else "Next", style = MaterialTheme.typography.titleMedium)
             }
-            if (last) TextButton({ onDone(false) }, Modifier.fillMaxWidth().height(48.dp)) { Text("I'll look around first") }
+            if (last) TextButton({ onDone(false) }, Modifier.fillMaxWidth().height(48.dp), colors = quietTextButton()) { Text("I'll look around first") }
             else Spacer(Modifier.height(48.dp))
         }
     }

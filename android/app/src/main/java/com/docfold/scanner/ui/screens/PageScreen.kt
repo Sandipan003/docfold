@@ -114,6 +114,7 @@ fun PageScreen(vm: AppViewModel, docId: String, pageId: String) {
     var drawing by remember { mutableStateOf(false) }
     var placing by remember { mutableStateOf<Bitmap?>(null) }
     var readingText by remember { mutableStateOf(false) }
+    var resizing by remember { mutableStateOf(false) }
     val config = LocalConfiguration.current
     val side = with(LocalDensity.current) { (max(config.screenWidthDp, config.screenHeightDp).dp.toPx()).roundToInt() }
         .coerceAtMost(if (DeviceProfile.lowRam) 1400 else 2000)
@@ -124,12 +125,16 @@ fun PageScreen(vm: AppViewModel, docId: String, pageId: String) {
             TopAppBar(
                 navigationIcon = { IconButton({ vm.back() }) { Icon(DocIcons.Back, "Back to pages") } },
                 title = { Text("Page ${pager.currentPage + 1} of ${doc.pages.size}", style = MaterialTheme.typography.headlineSmall) },
-                actions = {},
+                actions = {
+                    TextButton({ panel = Panel.None; resizing = true }, colors = quietTextButton()) {
+                        Icon(DocIcons.Expand, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text("Resize")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.navigationBarsPadding()) {
+            Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.navigationBarsPadding().topHairline()) {
                 if (placing != null) {
                     Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedButton({ placing = null }, Modifier.weight(1f).height(54.dp)) { Text("Cancel") }
@@ -175,6 +180,7 @@ fun PageScreen(vm: AppViewModel, docId: String, pageId: String) {
     )
     if (drawing) SignaturePad(vm, onDismiss = { drawing = false }) { drawing = false; placing = it }
     if (readingText) TextSheet(vm, docId, page) { readingText = false }
+    if (resizing) FormImageSheet(vm, doc, page) { resizing = false }
 }
 
 /** Where the signature sits on the page, as fractions of the upright page. Written by [SignaturePlacer]. */
@@ -286,13 +292,14 @@ private fun SignaturePad(vm: AppViewModel, onDismiss: () -> Unit, onDone: (Bitma
                     }
                 }
                 if (strokes.isEmpty() && current.isEmpty()) {
-                    Text("Draw your signature with your finger", color = Color(0xFF8E9199), modifier = Modifier.align(Alignment.Center))
+                    // The pad is white paper in both themes, so its hint stays dark.
+                    Text("Draw your signature with your finger", color = Color(0xFF52565F), modifier = Modifier.align(Alignment.Center))
                 }
             }
             Spacer(Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(!blue, { blue = false }, { Text("Black ink") })
-                FilterChip(blue, { blue = true }, { Text("Blue ink") })
+                FilterChip(!blue, { blue = false }, { Text("Black ink") }, leadingIcon = checkIf(!blue))
+                FilterChip(blue, { blue = true }, { Text("Blue ink") }, leadingIcon = checkIf(blue))
                 Spacer(Modifier.weight(1f))
                 TextButton({ strokes.clear() }, enabled = strokes.isNotEmpty()) { Text("Clear") }
             }

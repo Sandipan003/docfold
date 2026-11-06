@@ -34,7 +34,12 @@ enum class Quality(val label: String, val maxSide: Int?, val jpeg: Int) {
     High("high", 2200, 85),
     Balanced("standard", 1700, 72),
     Small("compact", 1250, 60),
-    Tiny("smallest", 900, 48),
+    Smaller("compact", 1050, 54),
+    Tiny("very small", 900, 48),
+    Tinier("very small", 770, 43),
+    Micro("tiny", 650, 38),
+    Minute("tiny", 550, 34),
+    Nano("smallest", 460, 30),
 }
 
 enum class Layout(val label: String) {
@@ -50,6 +55,8 @@ data class ExportOptions(
     val layout: Layout = Layout.OnePerPage,
     val password: String? = null,
     val searchable: Boolean = false,
+    /** A size the PDF must fit under, when the user picked one. */
+    val limitBytes: Long? = null,
 )
 
 /** A recognised line of text in image pixel coordinates (origin top-left). */

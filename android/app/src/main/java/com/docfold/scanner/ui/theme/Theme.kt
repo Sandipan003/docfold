@@ -1,6 +1,7 @@
 package com.docfold.scanner.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -67,7 +68,7 @@ private val DocfoldTypography = Typography(
 
 /** Data styles: postal dates, sizes and counts. */
 object Mono {
-    val small = TextStyle(fontFamily = MartianMono, fontSize = 10.sp, lineHeight = 14.sp, letterSpacing = 0.04.em)
+    val small = TextStyle(fontFamily = MartianMono, fontSize = 11.sp, lineHeight = 15.sp, letterSpacing = 0.04.em)
     val medium = TextStyle(fontFamily = MartianMono, fontSize = 12.sp, lineHeight = 17.sp, letterSpacing = 0.02.em)
     val strong = medium.copy(fontWeight = FontWeight.SemiBold)
 }
@@ -121,7 +122,7 @@ data class Inks(val all: List<Color>) {
     operator fun get(i: Int) = all[((i % all.size) + all.size) % all.size]
 }
 
-private val LightInks = Inks(listOf(Color(0xFFE2452B), Color(0xFF2F4FD8), Color(0xFF12825A), Color(0xFFB87500), Color(0xFF7A3FB0), Color(0xFFD03C7A)))
+val LightInks = Inks(listOf(Color(0xFFE2452B), Color(0xFF2F4FD8), Color(0xFF12825A), Color(0xFFB87500), Color(0xFF7A3FB0), Color(0xFFD03C7A)))
 private val DarkInks = Inks(listOf(Color(0xFFFF7A5C), Color(0xFF8EA2FF), Color(0xFF4CC79A), Color(0xFFF2B53A), Color(0xFFC49BF0), Color(0xFFFF86B8)))
 
 val LocalInks = staticCompositionLocalOf { LightInks }
@@ -141,6 +142,9 @@ enum class ThemeMode { System, Light, Dark }
 fun DocfoldTheme(mode: ThemeMode = ThemeMode.System, content: @Composable () -> Unit) {
     val dark = when (mode) { ThemeMode.System -> isSystemInDarkTheme(); ThemeMode.Light -> false; ThemeMode.Dark -> true }
     CompositionLocalProvider(LocalInks provides if (dark) DarkInks else LightInks, LocalDark provides dark) {
-        MaterialTheme(colorScheme = if (dark) Dark else Light, typography = DocfoldTypography, shapes = DocfoldShapes, content = content)
+        MaterialTheme(colorScheme = if (dark) Dark else Light, typography = DocfoldTypography, shapes = DocfoldShapes) {
+            // Text outside a Surface would otherwise fall back to black, whatever the theme.
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground, content = content)
+        }
     }
 }

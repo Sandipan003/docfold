@@ -101,8 +101,8 @@ export default function Privacy() {
 
           <h2 id="permissions">Permissions</h2>
           <p>
-            {site.name} does not ask for camera, photos, files, contacts or location permission. Scanning opens Google’s scanner or your
-            phone’s camera app, and choosing pictures uses Android’s photo picker, which only gives {site.name} the items you select.
+            {site.name} asks for the camera before your first scan, and for permission to save files before your first save. It never asks for
+            contacts or location. Scans stay on your phone. Choosing pictures uses Android’s photo picker, which only gives {site.name} the items you select.
           </p>
           <p>
             The app has internet and network-state access, and the advertising ID permission, which the ads SDK needs. {site.name} itself
@@ -114,6 +114,10 @@ export default function Privacy() {
             When you tap Save to phone, the PDF or images are written to your phone’s Downloads or Pictures folder. When you tap Share,
             Android’s share sheet sends the file to the app you choose, such as WhatsApp, Gmail or Google Drive. What happens next is
             governed by that app’s privacy policy.
+          </p>
+          <p>
+            A backup is one file holding your documents, saved only where you choose. {site.name} never uploads it. Keep it somewhere safe,
+            because it is not password-protected. Printing uses your phone’s print service and the printer you select.
           </p>
 
           <h2 id="children">Children</h2>

@@ -73,6 +73,10 @@ Copy everything from `STORE_LISTING.md`; upload graphics from `store-assets/`.
 | Advertising ID | **Yes**, used for **Advertising or marketing** (the AdMob SDK declares the AD_ID permission) |
 | Data safety | see the table below |
 
+### Permissions
+
+Docfold asks for the camera before the first scan, and for storage before the first save on Android 7–12 (`READ_EXTERNAL_STORAGE` up to API 32, `WRITE_EXTERNAL_STORAGE` up to API 28). Android 13+ has no permission for saving files, so Docfold shows its own question there. Do not add `READ_MEDIA_IMAGES`: Play restricts it to apps built around broad photo access, and the photo picker needs no permission. None of this changes the Data safety answers, because scans stay on the phone.
+
 ### Data safety form
 
 Docfold itself collects nothing: documents, images, OCR text and signatures never leave the phone, and data processed only on the device does not count as "collected" under Play's definitions. The **Google Mobile Ads SDK** does collect data, so declare it. Check the answers against Google's current disclosure for the SDK: https://developers.google.com/admob/android/privacy/play-data-disclosure

@@ -64,6 +64,8 @@ data class Doc(
     val sentAt: Long = 0,
     /** Bytes on disk, filled in when listing. */
     val sizeBytes: Long = 0,
+    /** The folder it is filed under, or empty. Folders exist only while a document names them. */
+    val folder: String = "",
 ) {
     fun toJson() = JSONObject().apply {
         put("v", 1)
@@ -73,6 +75,7 @@ data class Doc(
         put("updated", updated)
         put("color", color)
         put("sentAt", sentAt)
+        if (folder.isNotEmpty()) put("folder", folder)
         put("pages", JSONArray().apply { pages.forEach { put(it.toJson()) } })
     }
 
@@ -84,6 +87,7 @@ data class Doc(
             updated = o.optLong("updated"),
             color = o.optInt("color", 0),
             sentAt = o.optLong("sentAt", 0),
+            folder = o.optString("folder", ""),
             pages = o.optJSONArray("pages")?.let { a -> List(a.length()) { Page.fromJson(a.getJSONObject(it)) } } ?: emptyList(),
         )
     }

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.docfold.scanner.MainActivity
 import com.docfold.scanner.ads.Ads
 import com.docfold.scanner.scan.Scanner
+import com.docfold.scanner.ui.screens.AccessSheet
 import com.docfold.scanner.ui.screens.CropScreen
 import com.docfold.scanner.ui.screens.DocumentScreen
 import com.docfold.scanner.ui.screens.HomeScreen
@@ -77,6 +78,7 @@ fun AppRoot(vm: AppViewModel, activity: MainActivity) {
             }
         }
 
+        val access = rememberAccess(vm, activity)
         var target by rememberSaveable { mutableStateOf<String?>(null) }
         var cameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
         val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
@@ -99,9 +101,11 @@ fun AppRoot(vm: AppViewModel, activity: MainActivity) {
             AddActions(
                 scan = { id ->
                     target = id
-                    Scanner.start(activity, scanLauncher) {
-                        // Old or low-memory phones: Google's scanner isn't available, so use the camera + our own crop.
-                        camera(id)
+                    access.camera {
+                        Scanner.start(activity, scanLauncher) {
+                            // Old or low-memory phones: Google's scanner isn't available, so use the camera + our own crop.
+                            camera(id)
+                        }
                     }
                 },
                 photos = { id ->
@@ -109,7 +113,7 @@ fun AppRoot(vm: AppViewModel, activity: MainActivity) {
                     photosLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
                 pdf = { id -> target = id; pdfLauncher.launch(arrayOf("application/pdf")) },
-                camera = camera,
+                camera = { id -> access.camera { camera(id) } },
             )
         }
 
@@ -120,7 +124,7 @@ fun AppRoot(vm: AppViewModel, activity: MainActivity) {
 
         BackHandler(enabled = vm.stack.size > 1) { leaving(vm, activity) }
 
-        CompositionLocalProvider(LocalSnackbar provides snackbar) {
+        CompositionLocalProvider(LocalSnackbar provides snackbar, LocalAccess provides access) {
             Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 var lastDepth by remember { mutableIntStateOf(vm.stack.size) }
                 val depth = vm.stack.size
@@ -145,6 +149,7 @@ fun AppRoot(vm: AppViewModel, activity: MainActivity) {
                 }
                 LaunchedEffect(depth) { lastDepth = depth }
                 vm.busy?.let { BusyOverlay(it) }
+                AccessSheet(access)
             }
         }
     }

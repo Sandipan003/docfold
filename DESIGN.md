@@ -121,9 +121,9 @@ typography:
     letterSpacing: "0.03em"
   mono-small:
     fontFamily: "Martian Mono, ui-monospace, monospace"
-    fontSize: "10sp"
+    fontSize: "11sp"
     fontWeight: 400
-    lineHeight: "14sp"
+    lineHeight: "15sp"
     letterSpacing: "0.04em"
   mono-medium:
     fontFamily: "Martian Mono, ui-monospace, monospace"
@@ -237,7 +237,7 @@ A postal palette: paper grounds, engraving ink, airmail red and blue, and six st
 - **Hairline** (`hairline` / `hairline-night`): rules, card borders, stamp edges, the divider above the ad.
 
 ### Named Rules
-**The One Red Rule.** Airmail red means "do this". It goes on the primary action and on brand edges (band, chevron, postmark), never on decoration that competes with the action.
+**The One Red Rule.** Airmail red means "do this". It goes on the primary action, on the confirming word of a dialog, and on brand edges (band, chevron, postmark), never on decoration or navigation that competes with the action.
 
 **The Ink Belongs To The Document Rule.** A stamp ink identifies one document and travels with it everywhere it appears. Never use a stamp ink as a general UI accent or for status.
 
@@ -253,14 +253,14 @@ Fonts ship as static Latin subsets in `res/font/`; the website loads the same fa
 
 ### Hierarchy
 - **Display** (Archivo Condensed 900, 64 / 48 / 38sp, line 0.88–0.92): the "Docfold" masthead, intro chapter titles, giant page numerals (envelope count set at 50sp).
-- **Headline** (Archivo Condensed 900/700, 32 / 26 / 22sp): screen and sheet titles, document name, stamp denominations (page numbers at 20sp).
+- **Headline** (Archivo Condensed 900/700, 32 / 26 / 22sp): screen titles, the document name (32sp), stamp denominations (page numbers at 20sp). Sheet titles are Display 38sp.
 - **Title** (Archivo 600, 20 / 16sp): primary button labels, list item names, FAB label.
 - **Body** (Archivo 400, 16 / 14 / 12sp): instructions and descriptions, sentence case.
 - **Label** (Archivo 600–500, 15 / 12 / 11sp, slight positive tracking): secondary buttons and chips.
-- **Mono** (Martian Mono 10 / 12sp, +0.04 / +0.02em): postal dates ("TODAY 4:42 PM", "28 OCT"), file sizes, page and document counts, guide words, version string.
+- **Mono** (Martian Mono 11 / 12sp, +0.04 / +0.02em): postal dates ("TODAY 4:42 PM", "28 OCT"), file sizes, page and document counts, guide words, version string.
 
 ### Named Rules
-**The Scale Contrast Rule.** Hierarchy comes from size jumps (64sp masthead against 10sp mono), not from colour or extra weights.
+**The Scale Contrast Rule.** Hierarchy comes from size jumps (64sp masthead against 11sp mono), not from colour or extra weights.
 
 **The Mono Is Data Rule.** Martian Mono is only for dates, sizes and counts. Instructions, labels and actions are Archivo in sentence case; uppercase appears only inside mono data.
 
@@ -268,8 +268,8 @@ Fonts ship as static Latin subsets in `res/font/`; the website loads the same fa
 
 Single-column phone layout, edge-to-edge with inset padding. Screen gutter 20dp for headers and text, 16dp around envelope cards, 14dp around the page sheet. Vertical rhythm steps through 6, 8, 12, 14, 16, 20 and 24dp.
 
-- **Home:** airmail band under the status bar, masthead + mono count, search field with an Import button beside it, then a list of envelope cards (6dp vertical gap); guide-word rows (first and last date in view, mono, on a hairline) separate the list. Scan FAB bottom-right; list bottom padding 112dp clears it.
-- **Document:** the stamp sheet, a 3-column grid under 600dp wide (adaptive 150dp columns above), 12dp column gap and 14dp row gap, ending in a dashed "Add pages" tile. A bottom bar holds Add pages (outlined) and Save PDF (primary, 1.25× wider), 56dp tall.
+- **Home:** airmail band under the status bar, masthead + mono count, search field with an Import button beside it, folder chips once any folder exists, then a list of envelope cards (6dp vertical gap); guide-word rows (first and last date in view, mono, on a hairline) separate the list. Scan FAB bottom-right; list bottom padding 112dp clears it.
+- **Document:** the stamp sheet, a 3-column grid under 600dp wide (adaptive 150dp columns above), 12dp column gap and 14dp row gap, ending in a dashed "Add pages" tile. A bottom bar behind a hairline holds Add pages (outlined) and Save PDF (primary, 1.1× wider so both labels survive 130% text), 56dp tall.
 - **Sheets:** bottom sheets with 20dp horizontal padding; full-width 58dp primary and 54dp secondary actions.
 - **Targets:** every interactive element is at least 48dp; primary actions are 54–64dp tall.
 
@@ -308,7 +308,7 @@ Clear, labelled, thumb-sized.
 - **Shape:** fully rounded pill.
 - **Primary:** airmail red with white label by day, night red with engraving-ink label at night; 54–60dp tall, title-medium label, icon 20–24dp with 8–10dp gap.
 - **Outlined:** hairline outline, ink label, same height as the primary beside it.
-- **Text buttons:** red label with leading 18–20dp icon ("Settings", "Select", "More", "Merge", "Delete").
+- **Text buttons:** ink label with leading 18–20dp icon when they navigate or offer a side path ("Settings", "Select", "More"); red when they are the action itself ("Merge", "Delete"); airmail blue when they disclose more ("More options").
 - **Every action carries an icon and a text label.** Icon-only controls are limited to back, close and clear-search, each with a content description.
 
 ### Scan FAB
@@ -321,7 +321,7 @@ Large extended FAB, airmail red, 64dp tall, 26dp scan icon + "Scan" in title-lar
 - **Content:** a tilted perforated thumbnail framed in the document's ink; name (title-medium, 2 lines); mono date and size; a 50sp condensed page count in the document's ink with a mono "PAGES" unit. Exported documents carry a blue "SENT" postmark over the stamp.
 
 ### Page Stamp (signature)
-A page drawn as a postage stamp: perforated paper (0.74 aspect), the page image inside a 3dp ink frame, the two-digit page number set like a stamp's value in the bottom margin, and engraved edit marks beside it (corner for crop, dot for filter, arc for rotation). Selected stamps invert: ink paper, white numeral. Long-press lifts and drags to reflow the sheet.
+A page drawn as a postage stamp: perforated paper (0.74 aspect), the page image inside a 3dp ink frame, the two-digit page number set like a stamp's value in the bottom margin, and engraved edit marks beside it (corner for crop, dot for filter, arc for rotation). Selected stamps invert: ink paper with a numeral in the lowest paper colour, white by day and near-black on the bright night inks. Long-press lifts and drags to reflow the sheet.
 
 ### Chips
 Material filter chips with an 18dp check icon when on; used for export options and ink choices.
@@ -336,11 +336,14 @@ Material filter chips with an 18dp check icon when on; used for export options a
 ### Navigation
 Top app bars with a back icon and a condensed headline title; text actions on the right carry icons. Page editor tools are a row of icon-over-label buttons (56dp min height, 60dp wide).
 
+### Access Sheet
+Docfold's own permission questions, as a bottom sheet: 56dp icon well (role colour at 12%), Display 38sp question, one plain sentence saying what is used and where it stays, then a 58dp primary with icon and a 54dp "Not now". Android's own prompts are never imitated; this sheet appears only where Android has no prompt (saving on Android 13+) or has stopped asking (camera refused).
+
 ### Postmark Stamp
 The one celebratory motion: after export a 190dp red postmark (date, pages, size) lands with a short overshoot spring from 1.6× scale, holds 1.1 s, then fades over 380ms. Instant under Remove animations.
 
 ### Engraved Illustrations
-Scenes drawn on a 320-unit square with ink strokes and parallel hatching (1.1 width, 6-unit gap), white paper, and the palette's inks. Each loops one small motion and freezes at rest when animations are off. Used in the intro chapters and empty states.
+Scenes drawn on a 320-unit square with ink strokes and parallel hatching (1.1 width, 6-unit gap), white paper, and the palette's day inks in both themes, because the paper stays white. Intro scenes take all the height the text leaves, so small phones and large type shrink the scene, never the words. Each loops one small motion and freezes at rest when animations are off. Used in the intro chapters and empty states.
 
 ### Icons
 Docfold's own set: 24-unit grid, 1.8 stroke, round caps and joins, tinted by context. Matches the engraving line weight.

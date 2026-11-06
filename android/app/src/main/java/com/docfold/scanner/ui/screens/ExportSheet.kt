@@ -1,5 +1,7 @@
 package com.docfold.scanner.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -64,17 +67,21 @@ private enum class SizeChoice(val label: String, val limit: Long?, val quality: 
     Under1("Under 1 MB", 1_000_000, null),
     Under500("Under 500 KB", 500_000, null),
     Under200("Under 200 KB", 200_000, null),
+    Under100("Under 100 KB", 100_000, null),
+    Under50("Under 50 KB", 50_000, null),
+    Custom("Custom size", null, null),
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ExportSheet(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (ExportOptions) -> Unit, onShare: (ExportOptions) -> Unit) {
     var name by rememberSaveable { mutableStateOf(doc.name) }
-    var size by rememberSaveable { mutableStateOf(SizeChoice.Standard) }
-    var paper by rememberSaveable { mutableStateOf(PaperSize.Auto) }
+    var size by rememberSaveable { mutableStateOf(SizeChoice.entries.firstOrNull { it.name == vm.exportChoice("size") } ?: SizeChoice.Standard) }
+    var customKb by rememberSaveable { mutableStateOf(vm.exportChoice("customKb").orEmpty()) }
+    var paper by rememberSaveable { mutableStateOf(PaperSize.entries.firstOrNull { it.name == vm.exportChoice("paper") } ?: PaperSize.Auto) }
     var layout by rememberSaveable { mutableStateOf(Layout.OnePerPage) }
-    var margin by rememberSaveable { mutableStateOf(Margin.None) }
-    var searchable by rememberSaveable { mutableStateOf(false) }
+    var margin by rememberSaveable { mutableStateOf(Margin.entries.firstOrNull { it.name == vm.exportChoice("margin") } ?: Margin.None) }
+    var searchable by rememberSaveable { mutableStateOf(vm.exportChoice("searchable") == "true") }
     var protect by rememberSaveable { mutableStateOf(false) }
     var password by rememberSaveable { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
@@ -83,24 +90,25 @@ fun ExportSheet(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (Expo
     // Live estimate: re-measured whenever the size choice changes.
     var quality by remember { mutableStateOf(size.quality ?: Quality.Balanced) }
     var estimate by remember { mutableStateOf<Long?>(null) }
-    LaunchedEffect(size, doc.pages) {
+    val custom = size == SizeChoice.Custom
+    val limit = if (custom) customKb.toLongOrNull()?.takeIf { it > 0 }?.times(1000) else size.limit
+    LaunchedEffect(size, limit, doc.pages) {
         estimate = null
-        val limit = size.limit
-        if (limit == null) {
-            quality = size.quality ?: Quality.Balanced
-            estimate = vm.exporter.estimate(doc, quality)
-        } else {
-            val (q, e) = vm.exporter.qualityFor(doc, limit)
-            quality = q; estimate = e
+        when {
+            limit != null -> { val (q, e) = vm.exporter.qualityFor(doc, limit); quality = q; estimate = e }
+            !custom -> { quality = size.quality ?: Quality.Balanced; estimate = vm.exporter.estimate(doc, quality) }
         }
     }
 
     fun options() = ExportOptions(
         paper = paper, margin = margin, quality = quality, layout = layout,
-        password = password.takeIf { protect && it.isNotEmpty() }, searchable = searchable,
+        password = password.takeIf { protect && it.isNotEmpty() }, searchable = searchable, limitBytes = limit,
     )
-    fun commitName() { if (name.isNotBlank() && name != doc.name) vm.rename(doc.id, name) }
-    val ready = !protect || password.length >= 4
+    fun commit() {
+        if (name.isNotBlank() && name != doc.name) vm.rename(doc.id, name)
+        vm.rememberExport(mapOf("size" to size.name, "customKb" to customKb, "paper" to paper.name, "margin" to margin.name, "searchable" to searchable.toString()))
+    }
+    val ready = (!protect || password.length >= 4) && (!custom || limit != null)
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
@@ -117,13 +125,20 @@ fun ExportSheet(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (Expo
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SizeChoice.entries.forEach { c -> FilterChip(size == c, { size = c }, { Text(c.label) }, leadingIcon = checkIf(size == c)) }
             }
+            if (custom) {
+                Spacer(Modifier.height(4.dp))
+                OutlinedTextField(
+                    customKb, { customKb = it.filter(Char::isDigit).take(6) }, label = { Text("Largest size your form allows, in KB") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val e = estimate
-                val limit = size.limit
                 val fits = e != null && (limit == null || e <= limit)
                 Text(
                     when {
+                        custom && limit == null -> "Type a size above."
                         e == null -> "Measuring…"
                         limit != null && !fits -> "Smallest possible is about ${formatSize(e)}. Try removing pages."
                         limit != null -> "About ${formatSize(e)} · fits under ${formatSize(limit)}"
@@ -134,12 +149,16 @@ fun ExportSheet(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (Expo
                 )
             }
 
+            if (limit != null && quality >= Quality.Micro) {
+                Text("Small text may be hard to read at this size.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
+            }
             Spacer(Modifier.height(16.dp))
             HorizontalDivider()
-            TextButton({ more = !more }, Modifier.padding(vertical = 4.dp)) {
+            TextButton({ more = !more }, Modifier.padding(vertical = 4.dp), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)) {
+                val turn by animateFloatAsState(if (more) 180f else 0f, label = "more")
                 Text(if (more) "Fewer options" else "More options: page size, ID card, password, text")
                 Spacer(Modifier.width(6.dp))
-                Icon(DocIcons.ChevronDown, null, Modifier.size(18.dp))
+                Icon(DocIcons.ChevronDown, null, Modifier.size(18.dp).rotate(turn))
             }
             AnimatedVisibility(more) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -163,11 +182,11 @@ fun ExportSheet(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (Expo
             }
 
             Spacer(Modifier.height(20.dp))
-            Button({ commitName(); onSave(options()) }, Modifier.fillMaxWidth().height(58.dp), enabled = ready) {
+            Button({ commit(); onSave(options()) }, Modifier.fillMaxWidth().height(58.dp), enabled = ready) {
                 Icon(DocIcons.Download, null); Spacer(Modifier.width(10.dp)); Text("Save to phone", style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(10.dp))
-            OutlinedButton({ commitName(); onShare(options()) }, Modifier.fillMaxWidth().height(54.dp), enabled = ready) {
+            OutlinedButton({ commit(); onShare(options()) }, Modifier.fillMaxWidth().height(54.dp), enabled = ready) {
                 Icon(DocIcons.Share, null); Spacer(Modifier.width(10.dp)); Text("Share", maxLines = 1)
             }
         }
@@ -175,7 +194,7 @@ fun ExportSheet(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (Expo
 }
 
 /** A tick on the chosen chip, so the selection never relies on a faint tint alone. */
-private fun checkIf(on: Boolean): (@Composable () -> Unit)? =
+fun checkIf(on: Boolean): (@Composable () -> Unit)? =
     if (on) ({ Icon(DocIcons.Check, null, Modifier.size(18.dp)) }) else null
 
 @OptIn(ExperimentalLayoutApi::class)

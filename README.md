@@ -42,13 +42,15 @@ Competitor review research (CamScanner, Adobe Scan, Genius Scan, SwiftScan, and 
 | ID card front+back | ID-card layout at real card size |
 | 200–300 MB apps that drain batteries | ~4 MB; Google's scanner is delivered by Play services |
 
+New from user research: one-file backup and restore, folders, custom upload sizes down to a few KB with exact fitting, a photo and signature tool with exact pixels and Min/Max KB for online forms, naming a document from its first page, print, and remembered save settings.
+
 Also: crop with perspective fix, Magic / Grayscale / B&W filters with shadow removal, rotate (lossless), duplicate, move pages to a new doc, import photos/PDFs, share-to-Docfold from any app, save to Downloads or share, JPG export, dark theme, launcher "Scan" shortcut.
 
 ## Built for low-end phones
 
 - Custom PDF writer embeds JPEGs directly (no re-compression, one page in memory at a time), with optional AES-256 (PDF 2.0, R6).
 - Image sizes adapt to the phone's RAM; thumbnails are decoded two at a time into a heap-sized cache.
-- No permissions for camera, storage, contacts or location (system photo picker, ML Kit scanner, MediaStore).
+- Asks for the camera before the first scan and for saving before the first save. Photos come through the system photo picker, so no photo access is requested. No contacts or location.
 - R8-minified release: 3.9 MB universal APK, about 0.8 s cold start on the emulator.
 - Fallback for phones without Google's scanner: system camera + 4-corner perspective crop.
 

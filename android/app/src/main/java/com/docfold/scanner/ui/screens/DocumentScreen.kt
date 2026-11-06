@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
+import android.print.PrintManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +34,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
@@ -74,9 +77,12 @@ import androidx.compose.ui.zIndex
 import com.docfold.scanner.MainActivity
 import com.docfold.scanner.ads.BannerAd
 import com.docfold.scanner.data.Doc
+import com.docfold.scanner.data.nameFromText
+import com.docfold.scanner.pdf.PdfPrintAdapter
 import com.docfold.scanner.pdf.ExportOptions
 import com.docfold.scanner.ui.AddActions
 import com.docfold.scanner.ui.AppViewModel
+import com.docfold.scanner.ui.LocalAccess
 import com.docfold.scanner.ui.LocalSnackbar
 import com.docfold.scanner.ui.Screen
 import com.docfold.scanner.ui.components.PageStamp
@@ -86,6 +92,7 @@ import com.docfold.scanner.ui.components.rememberGridReorder
 import com.docfold.scanner.ui.theme.DocIcons
 import com.docfold.scanner.ui.theme.LocalInks
 import com.docfold.scanner.ui.theme.Mono
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -100,6 +107,7 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
         return
     }
     val context = LocalContext.current
+    val access = LocalAccess.current
     val ink = LocalInks.current[doc.color]
     val order = remember(doc.pages) { doc.pages.map { it.id }.toMutableStateList() }
     val byId = remember(doc.pages) { doc.pages.associateBy { it.id } }
@@ -109,6 +117,7 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
     var showAdd by remember { mutableStateOf(false) }
     var showExport by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
+    var filing by remember { mutableStateOf(false) }
     var confirmDeletePages by remember { mutableStateOf(false) }
     var pendingSave by remember { mutableStateOf<ExportOptions?>(null) }
     val grid = rememberLazyGridState()
@@ -119,13 +128,13 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
         onEnd = { if (order != doc.pages.map { it.id }) vm.reorder(doc.id, order.toList()) },
     )
 
-    fun saved(uri: Uri) = vm.notify("Saved to Downloads › Docfold", "Open") {
+    fun saved(uri: Uri, bytes: Long) = vm.notify("Saved to Downloads › Docfold · ${formatSize(bytes)}", "Open") {
         val view = Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/pdf").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         try { context.startActivity(view) } catch (e: ActivityNotFoundException) { vm.notify("No PDF viewer found. The file is in Downloads › Docfold.") }
     }
     val createDoc = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
         val opts = pendingSave
-        if (uri != null && opts != null) vm.savePdfTo(doc, opts, uri) { vm.notify("PDF saved") }
+        if (uri != null && opts != null) vm.savePdfTo(doc, opts, uri) { bytes -> vm.notify("PDF saved · ${formatSize(bytes)}") }
         pendingSave = null
     }
 
@@ -152,25 +161,33 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
                     },
                     actions = {
                         if (selecting) {
-                            TextButton({ if (selected.size == order.size) selected.clear() else { selected.clear(); selected.addAll(order) } }) {
+                            TextButton({ if (selected.size == order.size) selected.clear() else { selected.clear(); selected.addAll(order) } }, colors = quietTextButton()) {
                                 Text(if (selected.size == order.size) "None" else "All")
                             }
                         } else {
-                            if (doc.pages.size > 1) TextButton({ selecting = true }) {
+                            if (doc.pages.size > 1) TextButton({ selecting = true }, colors = quietTextButton()) {
                                 Icon(DocIcons.Select, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text("Select")
                             }
                             Box {
-                                TextButton({ menu = true }) {
+                                TextButton({ menu = true }, colors = quietTextButton()) {
                                     Icon(DocIcons.More, null, Modifier.size(18.dp)); Spacer(Modifier.width(2.dp)); Text("More")
                                 }
                                 DropdownMenu(menu, { menu = false }) {
                                     DropdownMenuItem({ Text("Rename") }, { menu = false; renaming = true }, leadingIcon = { Icon(DocIcons.Edit, null) })
+                                    DropdownMenuItem({ Text("Move to folder") }, { menu = false; filing = true }, leadingIcon = { Icon(DocIcons.Folder, null) })
                                     DropdownMenuItem({ Text("Add photos") }, { menu = false; actions.photos(doc.id) }, leadingIcon = { Icon(DocIcons.Photo, null) })
                                     DropdownMenuItem({ Text("Add pages from a PDF") }, { menu = false; actions.pdf(doc.id) }, leadingIcon = { Icon(DocIcons.Pdf, null) })
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                        DropdownMenuItem({ Text("Save pages to gallery") }, { menu = false; vm.saveImagesToGallery(doc) }, leadingIcon = { Icon(DocIcons.Images, null) })
+                                        DropdownMenuItem({ Text("Save pages to gallery") }, {
+                                            menu = false
+                                            access.saving({ vm.saveImagesToGallery(doc) }, { vm.notify("Not saved. You can allow saving in Settings.") })
+                                        }, leadingIcon = { Icon(DocIcons.Images, null) })
                                     }
                                     DropdownMenuItem({ Text("Share pages as images") }, { menu = false; vm.shareImages(doc) { share(it, "image/jpeg") } }, leadingIcon = { Icon(DocIcons.Share, null) })
+                                    DropdownMenuItem({ Text("Print") }, {
+                                        menu = false
+                                        vm.printPdf(doc) { file -> context.getSystemService(PrintManager::class.java)?.print(doc.name, PdfPrintAdapter(file, doc.name), null) }
+                                    }, leadingIcon = { Icon(DocIcons.Print, null) })
                                     HorizontalDivider()
                                     DropdownMenuItem({ Text("Delete document") }, { menu = false; vm.deleteDoc(doc.id) }, leadingIcon = { Icon(DocIcons.Delete, null) })
                                 }
@@ -181,7 +198,7 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
                 )
             },
             bottomBar = {
-                Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.navigationBarsPadding()) {
+                Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.navigationBarsPadding().topHairline()) {
                     Column {
                         if (selecting) SelectionActions(
                             enabled = selected.isNotEmpty(),
@@ -194,7 +211,7 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
                             OutlinedButton({ showAdd = true }, Modifier.weight(1f).height(56.dp), contentPadding = tight) {
                                 Icon(DocIcons.Add, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text("Add pages", maxLines = 1)
                             }
-                            Button({ showExport = true }, Modifier.weight(1.25f).height(56.dp), enabled = doc.pages.isNotEmpty(), contentPadding = tight) {
+                            Button({ showExport = true }, Modifier.weight(1.1f).height(56.dp), enabled = doc.pages.isNotEmpty(), contentPadding = tight) {
                                 Icon(DocIcons.Download, null, Modifier.size(22.dp)); Spacer(Modifier.width(8.dp)); Text("Save PDF", style = MaterialTheme.typography.titleMedium, maxLines = 1)
                             }
                         }
@@ -206,7 +223,7 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
             Column(Modifier.fillMaxSize().padding(pad)) {
                 // The name gets its own row so the labelled actions above never squeeze it. Tap to rename.
                 Text(
-                    doc.name, style = MaterialTheme.typography.headlineMedium, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    doc.name, style = MaterialTheme.typography.headlineLarge, maxLines = 2, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth().clickable(onClickLabel = "Rename") { renaming = true }.padding(start = 20.dp, end = 20.dp, bottom = 6.dp),
                 )
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -275,12 +292,15 @@ fun DocumentScreen(vm: AppViewModel, docId: String, actions: AddActions, activit
         vm, doc, onDismiss = { showExport = false },
         onSave = { opts ->
             showExport = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) vm.savePdfToDownloads(doc, opts, ::saved)
-            else { pendingSave = opts; createDoc.launch(doc.name + ".pdf") }
+            access.saving(
+                allowed = { vm.savePdfToDownloads(doc, opts, ::saved) },
+                declined = { pendingSave = opts; createDoc.launch(doc.name + ".pdf") },
+            )
         },
         onShare = { opts -> showExport = false; vm.sharePdf(doc, opts) { share(listOf(it), "application/pdf") } },
     )
-    if (renaming) RenameDialog(doc, onDismiss = { renaming = false }) { vm.rename(doc.id, it); renaming = false }
+    if (renaming) RenameDialog(vm, doc, onDismiss = { renaming = false }) { vm.rename(doc.id, it); renaming = false }
+    if (filing) FolderDialog(vm.folders(), doc.folder, { filing = false }) { target -> vm.moveToFolder(listOf(doc.id), target); filing = false }
     if (confirmDeletePages) AlertDialog(
         onDismissRequest = { confirmDeletePages = false },
         title = { Text("Delete ${plural(selected.size, "page")}?") },
@@ -335,12 +355,35 @@ fun ToolButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: Str
 }
 
 @Composable
-fun RenameDialog(doc: Doc, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+fun RenameDialog(vm: AppViewModel, doc: Doc, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     var name by remember { mutableStateOf(doc.name) }
+    var reading by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    fun nameFromFirstPage() {
+        val first = doc.pages.firstOrNull() ?: return
+        reading = true
+        note = null
+        scope.launch {
+            val text = runCatching { vm.readText(doc.id, first) }.getOrNull()
+            val found = text?.let(::nameFromText)
+            if (found != null) name = found
+            else note = if (text == null) "Text reading needs a one-time download. Connect to the internet and try again." else "No words found on page 1."
+            reading = false
+        }
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Rename") },
-        text = { OutlinedTextField(name, { name = it }, singleLine = true, label = { Text("Document name") }) },
+        text = {
+            Column {
+                OutlinedTextField(name, { name = it; note = null }, singleLine = true, label = { Text("Document name") })
+                note?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp)) }
+                if (doc.pages.isNotEmpty()) TextButton(::nameFromFirstPage, enabled = !reading, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)) {
+                    Text(if (reading) "Reading page 1…" else "Use the words on page 1")
+                }
+            }
+        },
         confirmButton = { TextButton({ onSave(name) }, enabled = name.isNotBlank()) { Text("Save") } },
         dismissButton = { TextButton(onDismiss) { Text("Cancel") } },
     )

@@ -7,10 +7,12 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -26,8 +28,12 @@ import com.docfold.scanner.data.PageFilter
 import com.docfold.scanner.imaging.ImageIO
 import com.docfold.scanner.ocr.Ocr
 import com.docfold.scanner.pdf.ExportOptions
+import com.docfold.scanner.pdf.Margin
+import com.docfold.scanner.pdf.PaperSize
 import com.docfold.scanner.pdf.PdfImporter
+import com.docfold.scanner.pdf.Quality
 import com.docfold.scanner.ui.components.Images
+import com.docfold.scanner.ui.screens.formatSize
 import com.docfold.scanner.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,7 +42,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FilterOutputStream
 import java.io.OutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 sealed interface Screen {
     data object Intro : Screen
@@ -52,6 +62,15 @@ data class Busy(val label: String, val done: Int = 0, val total: Int = 0)
 
 /** One-off messages for the snackbar; [actionLabel] + [action] make it actionable. */
 data class Notice(val text: String, val actionLabel: String? = null, val action: (() -> Unit)? = null)
+
+/** Counts what passes through, so a saved PDF can report its real size. */
+private class CountingStream(stream: OutputStream) : FilterOutputStream(stream) {
+    var count = 0L
+        private set
+
+    override fun write(b: Int) { out.write(b); count++ }
+    override fun write(b: ByteArray, off: Int, len: Int) { out.write(b, off, len); count += len }
+}
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val ctx: Context get() = getApplication()
@@ -255,19 +274,51 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun fileName(doc: Doc, ext: String) =
         doc.name.replace(':', '.').replace(Regex("[\\\\/*?\"<>|\\n]"), " ").trim().take(80).ifEmpty { "Docfold" } + ".$ext"
 
-    private suspend fun writePdf(doc: Doc, opts: ExportOptions, out: OutputStream) {
+    /**
+     * Writes the PDF and returns its size in bytes. With a size limit the size estimate isn't trusted: it is written
+     * to a scratch file and stepped down a quality at a time until it truly fits, or there is nothing smaller.
+     */
+    private suspend fun writePdf(doc: Doc, opts: ExportOptions, out: OutputStream): Long {
         if (opts.searchable && !Ocr.ensureReady(ctx)) notify("Text recognition needs a one-time download. Saved without searchable text.")
         val searchable = opts.searchable && Ocr.ensureReady(ctx)
-        exporter.write(
-            doc, opts.copy(searchable = searchable), out,
+        suspend fun render(o: ExportOptions, to: OutputStream) = exporter.write(
+            doc, o.copy(searchable = searchable), to,
             ocr = if (searchable) { b -> Ocr.lines(b) } else null,
             progress = progress("Writing page"),
         )
+        val limit = opts.limitBytes
+        if (limit == null) return CountingStream(out).also { render(opts, it) }.count
+        val scratch = File(ctx.cacheDir, "fit.pdf")
+        try {
+            var quality = opts.quality
+            while (true) {
+                withContext(Dispatchers.IO) { scratch.outputStream().buffered().use { render(opts.copy(quality = quality), it) } }
+                val smaller = Quality.entries.getOrNull(quality.ordinal + 1)
+                if (scratch.length() <= limit || smaller == null) break
+                quality = smaller
+            }
+            withContext(Dispatchers.IO) { scratch.inputStream().use { it.copyTo(out) } }
+            return scratch.length()
+        } finally {
+            scratch.delete()
+        }
     }
 
-    /** Android 10+: straight into Downloads/Docfold, no picker. Returns the new file's Uri. */
-    fun savePdfToDownloads(doc: Doc, opts: ExportOptions, onSaved: (Uri) -> Unit) = work("Sealing your PDF") {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return@work
+    private fun warnIfOverLimit(opts: ExportOptions, bytes: Long) {
+        val limit = opts.limitBytes ?: return
+        if (bytes > limit) notify("This PDF is ${formatSize(bytes)}, the smallest Docfold can make it. Try removing pages.")
+    }
+
+    /** Straight into Downloads/Docfold, no picker. Hands the new file's Uri and size to [onSaved]. */
+    fun savePdfToDownloads(doc: Doc, opts: ExportOptions, onSaved: (Uri, Long) -> Unit) = work("Sealing your PDF") {
+        val (uri, bytes) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) savePdfWithMediaStore(doc, opts) else savePdfAsFile(doc, opts)
+        sealed(doc, adBreak = opts.limitBytes == null)
+        warnIfOverLimit(opts, bytes)
+        onSaved(uri, bytes)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private suspend fun savePdfWithMediaStore(doc: Doc, opts: ExportOptions): Pair<Uri, Long> {
         val resolver = ctx.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName(doc, "pdf"))
@@ -277,29 +328,69 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
         val uri = withContext(Dispatchers.IO) { resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) }
             ?: error("Couldn't create the file in Downloads.")
+        var bytes = 0L
         try {
-            withContext(Dispatchers.IO) { resolver.openOutputStream(uri)?.use { writePdf(doc, opts, it) } ?: error("Couldn't write the file.") }
+            withContext(Dispatchers.IO) { resolver.openOutputStream(uri)?.use { bytes = writePdf(doc, opts, it) } ?: error("Couldn't write the file.") }
             withContext(Dispatchers.IO) { resolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null) }
         } catch (e: Exception) {
             withContext(Dispatchers.IO) { resolver.delete(uri, null, null) }
             throw e
         }
-        sealed(doc)
-        onSaved(uri)
+        return uri to bytes
     }
 
-    /** Older Android: write to a place the user picked with the system file picker. */
-    fun savePdfTo(doc: Doc, opts: ExportOptions, uri: Uri, onSaved: (Uri) -> Unit) = work("Sealing your PDF") {
-        withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri)?.use { writePdf(doc, opts, it) } }
-        sealed(doc)
-        onSaved(uri)
+    /** Android 7–9 has no MediaStore.Downloads: a plain file, which the storage permission allows. */
+    @Suppress("DEPRECATION")
+    private suspend fun savePdfAsFile(doc: Doc, opts: ExportOptions): Pair<Uri, Long> = withContext(Dispatchers.IO) {
+        val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Docfold").apply { mkdirs() }
+        val name = fileName(doc, "pdf")
+        var file = File(dir, name)
+        var copy = 1
+        while (file.exists()) file = File(dir, "${name.removeSuffix(".pdf")} (${copy++}).pdf")
+        val bytes = try {
+            file.outputStream().use { writePdf(doc, opts, it) }
+        } catch (e: Exception) {
+            file.delete()
+            throw e
+        }
+        MediaScannerConnection.scanFile(ctx, arrayOf(file.path), arrayOf("application/pdf"), null)
+        FileProvider.getUriForFile(ctx, ctx.packageName + ".files", file) to bytes
+    }
+
+    /** When saving wasn't allowed: write to a place the user picked with the system file picker. */
+    fun savePdfTo(doc: Doc, opts: ExportOptions, uri: Uri, onSaved: (Long) -> Unit) = work("Sealing your PDF") {
+        val bytes = withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri)?.use { writePdf(doc, opts, it) } } ?: 0L
+        sealed(doc, adBreak = opts.limitBytes == null)
+        warnIfOverLimit(opts, bytes)
+        onSaved(bytes)
     }
 
     /** Writes into the app cache for the share sheet; returns a content Uri. */
     fun sharePdf(doc: Doc, opts: ExportOptions, onReady: (Uri) -> Unit) = work("Preparing to share") {
         val f = exportFile(fileName(doc, "pdf"))
-        withContext(Dispatchers.IO) { f.outputStream().use { writePdf(doc, opts, it) } }
-        sealed(doc)
+        val bytes = withContext(Dispatchers.IO) { f.outputStream().use { writePdf(doc, opts, it) } }
+        sealed(doc, adBreak = opts.limitBytes == null)
+        warnIfOverLimit(opts, bytes)
+        onReady(FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f))
+    }
+
+    /** A print-ready A4 copy in the app cache, for Android's print screen. */
+    fun printPdf(doc: Doc, onReady: (File) -> Unit) = work("Preparing to print") {
+        val f = exportFile(fileName(doc, "pdf"))
+        withContext(Dispatchers.IO) { f.outputStream().use { writePdf(doc, ExportOptions(paper = PaperSize.A4, margin = Margin.Small, quality = Quality.High), it) } }
+        onReady(f)
+    }
+
+    fun formImageName(doc: Doc, width: Int, height: Int) = fileName(doc, "").removeSuffix(".") + " ${width}x$height.jpg"
+
+    fun saveBytes(uri: Uri, bytes: ByteArray) = work("Saving") {
+        withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri)?.use { it.write(bytes) } }
+        notify("Saved · ${formatSize(bytes.size.toLong())}")
+    }
+
+    fun shareBytes(name: String, bytes: ByteArray, onReady: (Uri) -> Unit) = work("Preparing to share") {
+        val f = exportFile(name)
+        withContext(Dispatchers.IO) { f.writeBytes(bytes) }
         onReady(FileProvider.getUriForFile(ctx, ctx.packageName + ".files", f))
     }
 
@@ -344,15 +435,64 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var exportsDone by mutableStateOf(prefs.getInt("exports", 0))
         private set
 
-    private suspend fun sealed(doc: Doc, postmark: Boolean = true) {
+    /** [adBreak] is false after a size-limited export: those users are mid-form and on a deadline, so no interstitial. */
+    private suspend fun sealed(doc: Doc, postmark: Boolean = true, adBreak: Boolean = true) {
         store.markSent(doc.id)
         exportsDone += 1
         prefs.edit { putInt("exports", exportsDone) }
         if (postmark) postmarkFor = doc.id
-        com.docfold.scanner.ads.Ads.markNaturalBreak()
+        if (adBreak) com.docfold.scanner.ads.Ads.markNaturalBreak()
     }
 
     fun storageBytes(): Long = store.docs.value.orEmpty().sumOf { it.sizeBytes }
+
+    // ── folders ─────────────────────────────────────────────────────────────────────────────────────
+
+    fun folders(): List<String> = store.docs.value.orEmpty().map { it.folder }.filter { it.isNotEmpty() }.distinct().sorted()
+
+    fun moveToFolder(ids: Collection<String>, folder: String) = viewModelScope.launch {
+        store.setFolder(ids, folder)
+        notify(if (folder.isBlank()) "Taken out of its folder" else "Moved to ${folder.trim()}")
+    }
+
+    // ── backup ──────────────────────────────────────────────────────────────────────────────────────
+
+    fun backupName() = "Docfold backup " + SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(Date()) + ".zip"
+
+    fun backupTo(uri: Uri) = work("Backing up") {
+        val out = withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri) } ?: error("Couldn't write the backup file.")
+        out.use { store.backup(it, progress("Backing up")) }
+        notify("Backup saved. Keep it somewhere safe, off this phone.")
+    }
+
+    fun restoreFrom(uri: Uri) = work("Restoring") {
+        val input = withContext(Dispatchers.IO) { ctx.contentResolver.openInputStream(uri) } ?: error("Couldn't open that file.")
+        val (added, here) = input.use { store.restore(it) }
+        notify(
+            when {
+                added == 0 && here > 0 -> "Those documents are already on this phone."
+                added == 0 -> "No documents found in that backup."
+                here > 0 -> "Restored ${added} document${if (added == 1) "" else "s"}. $here already here."
+                else -> "Restored ${added} document${if (added == 1) "" else "s"}."
+            },
+        )
+    }
+
+    // ── export choices ──────────────────────────────────────────────────────────────────────────────
+
+    /** The last Save as PDF choices, so a regular job needs no setting up. Layout and password stay per document. */
+    fun exportChoice(key: String): String? = prefs.getString("export.$key", null)
+
+    fun rememberExport(choices: Map<String, String>) = prefs.edit { choices.forEach { (key, value) -> putString("export.$key", value) } }
+
+    /** Android 13+ has no permission for saving files, so the answer to Docfold's own question is kept here. */
+    var savingAllowed by mutableStateOf(prefs.getBoolean("savingAllowed", false))
+        private set
+
+    fun allowSaving(allowed: Boolean) {
+        savingAllowed = allowed
+        prefs.edit { putBoolean("savingAllowed", allowed) }
+    }
 
     var reviewAsked: Boolean
         get() = prefs.getBoolean("reviewAsked", false)
